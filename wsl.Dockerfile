@@ -34,6 +34,7 @@ RUN apt-get update && \
     apt-transport-https \
     apt-utils \
     bash-completion \
+    build-essential \
     ca-certificates \
     gdb \
     gddrescue \
