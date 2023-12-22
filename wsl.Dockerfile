@@ -157,6 +157,8 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --pr
     ~/.cargo/bin/rustup component add rustfmt && \
     ~/.cargo/bin/rustup component add clippy && \
     ~/.cargo/bin/rustup install nightly --profile minimal && \
+    ~/.cargo/bin/rustup +nightly component add rustfmt && \
+    ~/.cargo/bin/rustup +nightly component add clippy && \
     ~/.cargo/bin/rustup install stable-x86_64-unknown-linux-musl --profile minimal && \
     ~/.cargo/bin/rustup install stable-aarch64-unknown-linux-musl --profile minimal && \
     ~/.cargo/bin/cargo install just
