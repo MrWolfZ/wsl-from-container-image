@@ -7,7 +7,7 @@ build:
   rm wsl.conf.copy
 
 run:
-  docker run -it --rm {{ img }} zsh
+  docker run -it --rm --name {{ name }} {{ img }} zsh
 
 export:
   mkdir -p /mnt/c/wsl

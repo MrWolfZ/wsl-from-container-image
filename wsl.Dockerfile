@@ -268,7 +268,9 @@ RUN mkdir -p ~/.local/bin && \
     mv ./lazydocker ~/.local/bin/lazydocker && \
     ~/.local/bin/lazydocker --version
 
-COPY --chown=root:root resolv.conf /etc/
+# docker mounts the /etc/resolv.conf, and we cannot overwrite it for the export; therefore
+# we copy the file to a temporary location and then move it during the WSL import
+COPY --chown=root:root resolv.conf /etc/resolv.conf.overwrite
 
 COPY --chown=dev:dev \
     .zshrc \

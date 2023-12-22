@@ -15,3 +15,4 @@
 - run `just build run` to build the image and run it as a container for testing
 - run `just export` to export the image's file system to `C:\wsl`
 - run the `C:\wsl\*-import.cmd` script to create the WSL distro
+  - you will be prompted for the sudo password in order to fix the `resolv.conf`
