@@ -140,12 +140,13 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install
     nvm install stable && \
     nvm install --lts
 
-# install tools for go development
+# install tools for go development (rename go dir to golang to work around `make` issue when a `go` dir is in path)
 ARG GO_VERSION=1.21.5
 RUN mkdir -p ~/.local/bin && \
     curl -OL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
     tar -C ~/.local/bin -xvf go${GO_VERSION}.linux-amd64.tar.gz && \
-    rm go${GO_VERSION}.linux-amd64.tar.gz
+    rm go${GO_VERSION}.linux-amd64.tar.gz && \
+    mv ~/.local/bin/go ~/.local/bin/golang
 
 # install tools for rust development
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal && \

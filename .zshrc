@@ -116,7 +116,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # environment variables
-export GOBIN="$HOME/.local/bin/go/bin"
+export GOBIN="$HOME/.local/bin/golang/bin"
 export CARGO_BIN="$HOME/.cargo/bin"
 export PATH="$PATH:$HOME/.local/bin:$GOBIN:$CARGO_BIN"
 
