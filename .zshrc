@@ -120,6 +120,9 @@ export GOBIN="$HOME/.local/bin/go/bin"
 export CARGO_BIN="$HOME/.cargo/bin"
 export PATH="$PATH:$HOME/.local/bin:$GOBIN:$CARGO_BIN"
 
+# deduplicate any entries in $PATH
+typeset -U path
+
 export DOTNET_CLI_TELEMETRY_OPTOUT='1'
 export MSBUILDSINGLELOADCONTEXT='1'
 
