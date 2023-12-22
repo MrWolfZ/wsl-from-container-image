@@ -21,6 +21,13 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get install -y ubuntu-minimal ubuntu-server ubuntu-standard ubuntu-wsl && \
     apt-get upgrade -y
 
+# configure additional OS settings
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    locale-gen "en_US" && \
+    locale-gen "en_US.UTF-8" && \
+    dpkg-reconfigure locales && \
+    update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+
 # install general tools
 RUN apt-get update && \
     apt-get install -y \
