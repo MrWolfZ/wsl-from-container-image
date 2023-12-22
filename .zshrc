@@ -141,8 +141,9 @@ source "$HOME/.zsh_completion_kubetail"
 
 # aliases
 alias k='kubectl'
-alias ls='ls -alh'
+alias ls='ls -alh --color=auto'
 alias kubectx=$ZSH/custom/plugins/kubectx/kubectx
 alias kubens=$ZSH/custom/plugins/kubectx/kubens
 alias docker-compose="TMPDIR=${HOME}/tmp docker-compose"
 alias python=python3
+alias code=/mnt/c/tools/VSCode/bin/code
