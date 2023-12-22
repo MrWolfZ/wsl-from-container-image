@@ -271,5 +271,21 @@ COPY --chown=dev:dev \
     .zsh_completion_kubetail \
     /home/dev/
 
-# skip the configuration wizard when running the image as test (env variables do not get exported to WSL)
-ENV POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
+# This image comes with a pre-configured powerlevel10k theme. You need to ensure that you have the NerdFont MesloLGF
+# installed in your terminals for icons to be rendered correctly. If you want to configure your own options, just
+# run "p10k configure" and step through the wizard. The default theme was created using the following options:
+# - prompt style: lean
+# - character set: unicode
+# - prompt colors: 256 colors
+# - current time: 12 hour format
+# - prompt height: 2 lines
+# - prompt connection: solid
+# - prompt frame: no frame
+# - prompt connection color: darkest
+# - prompt spacing: sparse
+# - icons: many icons
+# - prompt flow: concise
+# - transient prompt: no
+# - instant prompt: verbose
+#
+# You may also want to enable additional plugins in ~/.p10k.zsh
