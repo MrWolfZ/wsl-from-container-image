@@ -1,0 +1,25 @@
+#compdef kubectx kt=kubectx
+compdef _kubectx kubectx
+
+_kubectx()
+{
+  source $ZSH/custom/plugins/kubectx/completion/_kubectx.zsh
+}
+
+# don't run the completion function when being source-ed or eval-ed
+if [ "$funcstack[1]" = "_kubectx" ]; then
+    _kubectx
+fi
+
+#compdef kubens kt=kubens
+compdef _kubens kubens
+
+_kubens()
+{
+  source $ZSH/custom/plugins/kubectx/completion/_kubens.zsh
+}
+
+# don't run the completion function when being source-ed or eval-ed
+if [ "$funcstack[1]" = "_kubens" ]; then
+    _kubens
+fi
