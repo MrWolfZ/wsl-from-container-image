@@ -131,7 +131,9 @@ RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master
 RUN mkdir -p ~/.local/bin && \
     export bin_path=~/.local/bin && \
     curl -sfL https://direnv.net/install.sh | bash && \
-    ~/.local/bin/direnv --version
+    ~/.local/bin/direnv --version && \
+    mkdir -p ~/.config/direnv && \
+    echo -e "strict_env\nDIRENV_LOG_FORMAT=" | tee ~/.config/direnv/direnvrc
 
 # install tools for node development
 ARG NVM_VERSION=v0.39.7
