@@ -91,7 +91,9 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y \
     python3 \
-    python3.12
+    python3-venv \
+    python3.12 \
+    python3.12-venv
 
 # run one last upgrade to ensure everything is up to date
 RUN apt-get update && apt-get upgrade -y
