@@ -1,0 +1,3 @@
+Package: podman buildah
+Pin: origin download.opensuse.org
+Pin-Priority: 1001

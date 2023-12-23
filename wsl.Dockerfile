@@ -46,9 +46,31 @@ RUN apt-get update && \
     unzip \
     zsh
 
-# install tools for container development
-RUN apt-get update && \
+# install tools for container development; we use the kubic project for installing podman and buildah
+# (as described here: https://podman.io/docs/installation#debian) since the versions in the official
+# ubuntu repositories are horribly outdated
+COPY containers-apt-preferences.txt /etc/apt/preferences.d/containers
+RUN mkdir -p /etc/apt/keyrings && \
+    # install Debian Testing/Bookworm repository
+    curl -fsSL https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Testing/Release.key \
+    | gpg --dearmor \
+    | sudo tee /etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg > /dev/null && \
+    echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg]\
+    https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Testing/ /" \
+    | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list > /dev/null && \
+    # install Debian Unstable/Sid repository
+    curl -fsSL https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Unstable/Release.key \
+    | gpg --dearmor \
+    | sudo tee /etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg > /dev/null && \
+    echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg]\
+    https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Unstable/ /" \
+    | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list > /dev/null && \
+    # finally, install the tools
+    apt-get update && \
     apt-get install -y \
+    containernetworking-plugins \
     buildah \
     podman && \
     export DIVE_VERSION=$(curl -sL "https://api.github.com/repos/wagoodman/dive/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/') && \
