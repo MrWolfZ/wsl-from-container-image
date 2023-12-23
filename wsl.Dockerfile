@@ -46,6 +46,21 @@ RUN apt-get update && \
     unzip \
     zsh
 
+# install tools for C development (useful for bulding other projects from source)
+RUN apt-get update && \
+    apt-get install -y \
+    gcc \
+    git \
+    libc6-dev \
+    libglib2.0-dev \
+    libglib2.0-dev \
+    libseccomp-dev \
+    libseccomp-dev \
+    libsystemd-dev \
+    make \
+    pkg-config \
+    runc
+
 # install tools for container development; we use the kubic project for installing podman and buildah
 # (as described here: https://podman.io/docs/installation#debian) since the versions in the official
 # ubuntu repositories are horribly outdated
@@ -101,6 +116,7 @@ RUN apt-get update && \
 # install tools for rust development
 RUN apt-get update && \
     apt-get install -y \
+    g++-aarch64-linux-gnu \
     gcc-aarch64-linux-gnu \
     gcc-arm-linux-gnueabihf \
     libc6-armhf-cross \
