@@ -142,6 +142,8 @@ source "$HOME/.zsh_completion_kubectl"
 source "$HOME/.zsh_completion_kubectx"
 source "$HOME/.zsh_completion_kubetail"
 
+source "$HOME/.zsh_completion_just"
+
 # aliases
 alias k='kubectl'
 alias ls='ls -alh --color=auto'
