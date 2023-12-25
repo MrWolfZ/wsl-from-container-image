@@ -93,6 +93,9 @@ RUN mkdir -p /etc/apt/keyrings && \
     apt install ./dive_${DIVE_VERSION}_linux_amd64.deb && \
     rm ./dive_${DIVE_VERSION}_linux_amd64.deb
 
+# enable the podman socket service so that other tools can use its docker-compatible API
+RUN systemctl enable --user podman.socket
+
 # install tools for Azure development
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 

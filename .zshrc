@@ -152,3 +152,4 @@ alias kubens=$ZSH/custom/plugins/kubectx/kubens
 alias docker-compose="TMPDIR=${HOME}/tmp docker-compose"
 alias python=python3
 alias code=/mnt/c/tools/VSCode/bin/code
+alias lazypodman='DOCKER_HOST=unix:///run/user/1000/podman/podman.sock lazydocker'
