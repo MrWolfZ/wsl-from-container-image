@@ -283,7 +283,7 @@ RUN mkdir -p ~/.local/bin && \
 
 ## kubebuilder
 RUN mkdir -p ~/.local/bin && \
-    curl -L -o kubebuilder https://go.kubebuilder.io/dl/latest/$(~/.local/bin/go/bin/go env GOOS)/$(~/.local/bin/go/bin/go env GOARCH) && \
+    curl -L -o kubebuilder https://go.kubebuilder.io/dl/latest/$(~/.local/bin/golang/bin/go env GOOS)/$(~/.local/bin/golang/bin/go env GOARCH) && \
     chmod +x ./kubebuilder && \
     mv ./kubebuilder ~/.local/bin/kubebuilder && \
     ~/.local/bin/kubebuilder version
