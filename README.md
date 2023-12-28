@@ -6,6 +6,7 @@
 - install [Docker](https://www.docker.com/get-started/) with WSL2 engine
 - enable docker WSL integration for the distro created above
 - install [just](https://github.com/casey/just) in WSL
+- install [recommended font](https://github.com/romkatv/powerlevel10k/blob/master/font.md) on host
 
 ## Building the distro
 
