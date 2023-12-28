@@ -327,6 +327,7 @@ COPY --chown=dev:dev \
     .zshrc \
     .p10k.zsh \
     .gitconfig \
+    .zsh_completion_just \
     .zsh_completion_kubectx \
     .zsh_completion_kubetail \
     /home/dev/
