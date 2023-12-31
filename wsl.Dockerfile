@@ -319,6 +319,12 @@ RUN mkdir -p ~/.local/bin && \
     mv ./lazydocker ~/.local/bin/lazydocker && \
     ~/.local/bin/lazydocker --version
 
+RUN mkdir -p ~/.local/bin && \
+    curl -LO https://dl.min.io/client/mc/release/linux-amd64/mc && \
+    chmod +x mc && \
+    mv mc ~/.local/bin/ && \
+    ~/.local/bin/mc --version
+
 # docker mounts the /etc/resolv.conf, and we cannot overwrite it for the export; therefore
 # we copy the file to a temporary location and then move it during the WSL import
 COPY --chown=root:root resolv.conf /etc/resolv.conf.overwrite
