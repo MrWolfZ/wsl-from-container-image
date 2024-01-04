@@ -19,7 +19,10 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     # finally we can install various ubuntu packages to install all the default tools
     apt-get update && \
     apt-get install -y ubuntu-minimal ubuntu-server ubuntu-standard ubuntu-wsl && \
-    apt-get upgrade -y
+    apt-get upgrade -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/debconf/* && \
+    rm -rf /var/lib/command-not-found
 
 # configure additional OS settings
 RUN export DEBIAN_FRONTEND=noninteractive && \
@@ -44,7 +47,10 @@ RUN apt-get update && \
     lsb-release \
     nano \
     unzip \
-    zsh
+    zsh && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/debconf/* && \
+    rm -rf /var/lib/command-not-found
 
 # install tools for C development (useful for bulding other projects from source)
 RUN apt-get update && \
@@ -59,7 +65,10 @@ RUN apt-get update && \
     libsystemd-dev \
     make \
     pkg-config \
-    runc
+    runc && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/debconf/* && \
+    rm -rf /var/lib/command-not-found
 
 # install tools for container development; we use the kubic project for installing podman and buildah
 # (as described here: https://podman.io/docs/installation#debian) since the versions in the official
@@ -80,6 +89,9 @@ RUN mkdir -p /etc/apt/keyrings && \
     containernetworking-plugins \
     buildah \
     podman && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/debconf/* && \
+    rm -rf /var/lib/command-not-found && \
     export DIVE_VERSION=$(curl -sL "https://api.github.com/repos/wagoodman/dive/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/') && \
     curl -OL https://github.com/wagoodman/dive/releases/download/v${DIVE_VERSION}/dive_${DIVE_VERSION}_linux_amd64.deb && \
     apt install ./dive_${DIVE_VERSION}_linux_amd64.deb && \
@@ -100,13 +112,19 @@ RUN wget https://packages.microsoft.com/config/ubuntu/$(lsb_release -r -s)/packa
     apt-get install -y \
     dotnet-sdk-6.0 \
     dotnet-sdk-7.0 \
-    dotnet-sdk-8.0
+    dotnet-sdk-8.0 && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/debconf/* && \
+    rm -rf /var/lib/command-not-found
 
 # install tools for java development
 RUN apt-get update && \
     apt-get install -y \
     openjdk-11-jdk \
-    openjdk-17-jdk
+    openjdk-17-jdk && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/debconf/* && \
+    rm -rf /var/lib/command-not-found
 
 # install tools for rust development
 RUN apt-get update && \
@@ -118,7 +136,10 @@ RUN apt-get update && \
     libc6-dev-armhf-cross \
     musl-dev \
     musl-tools \
-    qemu-user-static
+    qemu-user-static && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/debconf/* && \
+    rm -rf /var/lib/command-not-found
 
 # install tools for python development
 RUN add-apt-repository ppa:deadsnakes/ppa && \
@@ -127,10 +148,17 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
     python3 \
     python3-venv \
     python3.12 \
-    python3.12-venv
+    python3.12-venv && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/debconf/* && \
+    rm -rf /var/lib/command-not-found
 
 # run one last upgrade to ensure everything is up to date
-RUN apt-get update && apt-get upgrade -y
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/debconf/* && \
+    rm -rf /var/lib/command-not-found
 
 COPY wsl.conf.copy /etc/wsl.conf
 
