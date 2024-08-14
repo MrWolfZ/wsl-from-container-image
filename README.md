@@ -10,9 +10,7 @@
 
 ## Building the distro
 
-- create a file `passwd` and put a hashed password into it (e.g. `$6$some_salt$...`)
-- create a file `.gitconfig` and configure it as desired
-- create a file `resolv.conf` and configure your favorite nameserver (e.g. `nameserver 1.1.1.1` or `nameserver 8.8.8.8`)
+- adjust `.gitconfig` as desired
 - run `just build run` to build the image and run it as a container for testing
 - run `just export` to export the image's file system to `C:\wsl`
 - run the `C:\wsl\*-import.cmd` script to create the WSL distro

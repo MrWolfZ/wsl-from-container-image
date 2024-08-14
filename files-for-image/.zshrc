@@ -120,6 +120,9 @@ export GOBIN="$HOME/.local/bin/golang/bin"
 export CARGO_BIN="$HOME/.cargo/bin"
 export PATH="$PATH:$HOME/.local/bin:$GOBIN:$CARGO_BIN"
 
+# define a pager for unpaged git log
+export PAGER="less -F"
+
 # deduplicate any entries in $PATH
 typeset -U path
 
@@ -128,6 +131,8 @@ export MSBUILDSINGLELOADCONTEXT='1'
 
 export DOCKER_SCAN_SUGGEST='false'
 export DOCKER_CLI_HINTS='false'
+
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 export USE_GKE_GCLOUD_AUTH_PLUGIN='True'
 
@@ -144,12 +149,13 @@ source "$HOME/.zsh_completion_kubetail"
 
 source "$HOME/.zsh_completion_just"
 
+source "$HOME/.zsh_completion_az"
+
 # aliases
 alias k='kubectl'
-alias ls='ls -alh --color=auto'
+alias ll='ls -alh --color=auto'
 alias kubectx=$ZSH/custom/plugins/kubectx/kubectx
 alias kubens=$ZSH/custom/plugins/kubectx/kubens
-alias docker-compose="TMPDIR=${HOME}/tmp docker-compose"
 alias python=python3
 alias code=/mnt/c/tools/VSCode/bin/code
 alias lazypodman='DOCKER_HOST=unix:///run/user/1000/podman/podman.sock lazydocker'

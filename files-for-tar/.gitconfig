@@ -1,0 +1,26 @@
+[alias]
+jedi = push --force
+
+[core]
+autocrlf = false
+safecrlf = false
+longpaths = true
+symlinks = true
+
+[credential]
+helper = /mnt/c/Users/jozi/AppData/Local/Programs/Git/mingw64/libexec/git-core/git-credential-manager.exe
+
+[http]
+cookiefile = /home/dev/.gitcookies
+
+[init]
+defaultBranch = main
+
+[pull]
+rebase = preserve
+
+[push]
+autoSetupRemote = true
+
+[rerere]
+enabled = true

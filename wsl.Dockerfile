@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 ARG TIMEZONE=Europe/Zurich
 
 # create an initial fully upgraded ubuntu installation
@@ -59,8 +59,7 @@ RUN apt-get update && \
     git \
     libc6-dev \
     libglib2.0-dev \
-    libglib2.0-dev \
-    libseccomp-dev \
+    libgpgme-dev \
     libseccomp-dev \
     libsystemd-dev \
     make \
@@ -78,11 +77,11 @@ RUN mkdir -p /etc/apt/keyrings && \
     # install Debian Unstable/Sid repository
     curl -fsSL https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Unstable/Release.key \
     | gpg --dearmor \
-    | sudo tee /etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg > /dev/null && \
+    | tee /etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg > /dev/null && \
     echo \
     "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg]\
     https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Unstable/ /" \
-    | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list > /dev/null && \
+    | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list > /dev/null && \
     # finally, install the tools
     apt-get update && \
     apt-get install -y \
@@ -96,9 +95,6 @@ RUN mkdir -p /etc/apt/keyrings && \
     curl -OL https://github.com/wagoodman/dive/releases/download/v${DIVE_VERSION}/dive_${DIVE_VERSION}_linux_amd64.deb && \
     apt install ./dive_${DIVE_VERSION}_linux_amd64.deb && \
     rm ./dive_${DIVE_VERSION}_linux_amd64.deb
-
-# enable the podman socket service so that other tools can use its docker-compatible API
-RUN systemctl enable --user podman.socket
 
 # install tools for Azure development
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
@@ -163,20 +159,28 @@ RUN apt-get update && \
 COPY wsl.conf.copy /etc/wsl.conf
 
 # create a dedicated user
-RUN --mount=type=secret,id=dev_passwd \
+RUN export PASSWORD=$(mkpasswd -m sha512crypt changeme) && \
     groupadd dev --gid 1000 && \
     useradd dev \
     --uid 1000 \
     --gid 1000 \
-    --password $(cat /run/secrets/dev_passwd) \
+    --password $PASSWORD \
     --shell $(which zsh) \
     --create-home && \
-    usermod -aG sudo dev
+    usermod -aG sudo dev && \
+    # add bigger id ranges for the dev user for podman containers with a lot of files
+    echo "dev:100000:565536" > /etc/subgid && \
+    echo "dev:100000:565536" > /etc/subuid
+
+RUN chown -R dev:dev /home/dev/
 
 # run the rest of the setup as the dev user
 USER dev
 SHELL ["/bin/bash", "-c"]
 WORKDIR /home/dev
+
+# enable the podman socket service so that other tools can use its docker-compatible API
+RUN systemctl enable --user podman.socket
 
 # configure shell
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
@@ -339,15 +343,15 @@ RUN mkdir -p ~/.local/bin && \
     mv ./lazydocker ~/.local/bin/lazydocker && \
     ~/.local/bin/lazydocker --version
 
+## minio CLI
 RUN mkdir -p ~/.local/bin && \
     curl -LO https://dl.min.io/client/mc/release/linux-amd64/mc && \
     chmod +x mc && \
     mv mc ~/.local/bin/ && \
     ~/.local/bin/mc --version
 
-# docker mounts the /etc/resolv.conf, and we cannot overwrite it for the export; therefore
-# we copy the file to a temporary location and then move it during the WSL import
-COPY --chown=root:root resolv.conf /etc/resolv.conf.overwrite
+## azure CLI completions
+RUN curl -L -o ~/.zsh_completion_az https://raw.githubusercontent.com/Azure/azure-cli/az.completion
 
 COPY --chown=dev:dev \
     .zshrc \
@@ -357,6 +361,9 @@ COPY --chown=dev:dev \
     .zsh_completion_kubectx \
     .zsh_completion_kubetail \
     /home/dev/
+
+# create some default directories
+RUN mkdir ~/src
 
 # This image comes with a pre-configured powerlevel10k theme. You need to ensure that you have the NerdFont MesloLGF
 # installed in your terminals for icons to be rendered correctly. If you want to configure your own options, just
