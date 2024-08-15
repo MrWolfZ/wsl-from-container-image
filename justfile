@@ -18,7 +18,7 @@ build:
 
   sed 's/@@ name @/{{ name }}/g' files-for-image/wsl.conf > files-for-image/wsl.conf.copy
 
-  docker build files-for-image -f wsl.Dockerfile --tag {{ img }}
+  docker build files-for-image -f wsl.Containerfile --tag {{ img }}
 
   rm files-for-image/wsl.conf.copy
 

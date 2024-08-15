@@ -55,43 +55,39 @@ RUN apt-get update && \
 # install tools for C development (useful for bulding other projects from source)
 RUN apt-get update && \
     apt-get install -y \
+    autoconf \
+    automake \
+    btrfs-progs \
+    crun \
     gcc \
     git \
+    go-md2man \
+    golang-go \
+    iptables \
+    libassuan-dev \
+    libbtrfs-dev \
     libc6-dev \
+    libdevmapper-dev \
     libglib2.0-dev \
+    libgpg-error-dev \
     libgpgme-dev \
+    libprotobuf-c-dev \
+    libprotobuf-dev \
     libseccomp-dev \
+    libselinux1-dev \
     libsystemd-dev \
+    libtool \
     make \
     pkg-config \
-    runc && \
+    runc \
+    slirp4netns \
+    uidmap && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/debconf/* && \
     rm -rf /var/lib/command-not-found
 
-# install tools for container development; we use the kubic project for installing podman and buildah
-# (as described here: https://podman.io/docs/installation#debian) since the versions in the official
-# ubuntu repositories are horribly outdated
-COPY containers-apt-preferences.txt /etc/apt/preferences.d/containers
-RUN mkdir -p /etc/apt/keyrings && \
-    # install Debian Unstable/Sid repository
-    curl -fsSL https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Unstable/Release.key \
-    | gpg --dearmor \
-    | tee /etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg > /dev/null && \
-    echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg]\
-    https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Unstable/ /" \
-    | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list > /dev/null && \
-    # finally, install the tools
-    apt-get update && \
-    apt-get install -y \
-    containernetworking-plugins \
-    buildah \
-    podman && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /var/cache/debconf/* && \
-    rm -rf /var/lib/command-not-found && \
-    export DIVE_VERSION=$(curl -sL "https://api.github.com/repos/wagoodman/dive/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/') && \
+# install tools for container development
+RUN export DIVE_VERSION=$(curl -sL "https://api.github.com/repos/wagoodman/dive/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/') && \
     curl -OL https://github.com/wagoodman/dive/releases/download/v${DIVE_VERSION}/dive_${DIVE_VERSION}_linux_amd64.deb && \
     apt install ./dive_${DIVE_VERSION}_linux_amd64.deb && \
     rm ./dive_${DIVE_VERSION}_linux_amd64.deb
@@ -100,10 +96,7 @@ RUN mkdir -p /etc/apt/keyrings && \
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
 # install tools for dotnet development
-COPY dotnet-apt-preferences.txt /etc/apt/preferences.d/dotnet
-RUN wget https://packages.microsoft.com/config/ubuntu/$(lsb_release -r -s)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
-    dpkg -i packages-microsoft-prod.deb && \
-    rm packages-microsoft-prod.deb && \
+RUN add-apt-repository ppa:dotnet/backports && \
     apt-get update && \
     apt-get install -y \
     dotnet-sdk-6.0 \
@@ -117,7 +110,8 @@ RUN wget https://packages.microsoft.com/config/ubuntu/$(lsb_release -r -s)/packa
 RUN apt-get update && \
     apt-get install -y \
     openjdk-11-jdk \
-    openjdk-17-jdk && \
+    openjdk-17-jdk \
+    openjdk-21-jdk && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/debconf/* && \
     rm -rf /var/lib/command-not-found
@@ -149,6 +143,14 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
     rm -rf /var/cache/debconf/* && \
     rm -rf /var/lib/command-not-found
 
+# install tool to create user (specifically mkpasswd included in the whois package
+RUN apt-get update && \
+    apt-get install -y \
+    whois && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/debconf/* && \
+    rm -rf /var/lib/command-not-found
+
 # run one last upgrade to ensure everything is up to date
 RUN apt-get update && \
     apt-get upgrade -y && \
@@ -158,8 +160,10 @@ RUN apt-get update && \
 
 COPY wsl.conf.copy /etc/wsl.conf
 
-# create a dedicated user
-RUN export PASSWORD=$(mkpasswd -m sha512crypt changeme) && \
+# delete the default ubuntu user and create a dedicated dev user
+RUN userdel ubuntu && \
+    rm -rf /home/ubuntu && \
+    export PASSWORD=$(mkpasswd -m sha512crypt changeme) && \
     groupadd dev --gid 1000 && \
     useradd dev \
     --uid 1000 \
@@ -169,8 +173,7 @@ RUN export PASSWORD=$(mkpasswd -m sha512crypt changeme) && \
     --create-home && \
     usermod -aG sudo dev && \
     # add bigger id ranges for the dev user for podman containers with a lot of files
-    echo "dev:100000:565536" > /etc/subgid && \
-    echo "dev:100000:565536" > /etc/subuid
+    usermod --add-subuids 100000:565536 --add-subgids 100000:565536 dev
 
 RUN chown -R dev:dev /home/dev/
 
@@ -179,8 +182,8 @@ USER dev
 SHELL ["/bin/bash", "-c"]
 WORKDIR /home/dev
 
-# enable the podman socket service so that other tools can use its docker-compatible API
-RUN systemctl enable --user podman.socket
+# create some default directories
+RUN mkdir ~/src
 
 # configure shell
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
@@ -204,19 +207,48 @@ RUN mkdir -p ~/.local/bin && \
     echo -e "strict_env\nDIRENV_LOG_FORMAT=" | tee ~/.config/direnv/direnvrc
 
 # install tools for node development
-ARG NVM_VERSION=v0.39.7
+ARG NVM_VERSION=v0.40.0
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash && \
     source .nvm/nvm.sh && \
     nvm install stable && \
     nvm install --lts
 
 # install tools for go development (rename go dir to golang to work around `make` issue when a `go` dir is in path)
-ARG GO_VERSION=1.21.5
+ARG GO_VERSION=1.23.0
 RUN mkdir -p ~/.local/bin && \
     curl -OL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
     tar -C ~/.local/bin -xvf go${GO_VERSION}.linux-amd64.tar.gz && \
     rm go${GO_VERSION}.linux-amd64.tar.gz && \
     mv ~/.local/bin/go ~/.local/bin/golang
+
+# we build podman from source since the ubuntu repositories are often lagging behind
+RUN export PODMAN_VERSION="v5.2.1" && \
+    cd ~/src && \
+    git clone https://github.com/containers/conmon && \
+    cd conmon && \
+    export GOCACHE="$(mktemp -d)" && \
+    make && \
+    echo "changeme" | sudo -S make podman && \
+    cd .. && \
+    echo "changeme" | sudo -S mkdir -p /etc/containers && \
+    git clone https://github.com/containers/podman.git && \
+    cd podman && \
+    git checkout tags/$PODMAN_VERSION && \
+    make BUILDTAGS="apparmor cni exclude_graphdriver_devicemapper selinux seccomp systemd" PREFIX=/usr && \
+    echo "changeme" | sudo -S make install PREFIX=/usr && \
+    podman --version
+
+# these commands may be required as well, or only when running the container in docker / podman itself
+# chmod 4755 /usr/bin/newgidmap
+# chmod 4755 /usr/bin/newuidmap
+# sudo chmod u-s /usr/bin/new[gu]idmap
+# sudo setcap cap_setuid+eip /usr/bin/newuidmap
+# sudo setcap cap_setgid+eip /usr/bin/newgidmap
+
+COPY --chown=root:root containers.conf registries.conf policy.json /etc/containers/
+
+# enable the podman socket service so that other tools can use its docker-compatible API
+RUN systemctl enable --user podman.socket
 
 # install tools for rust development
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal && \
@@ -356,14 +388,12 @@ RUN curl -L -o ~/.zsh_completion_az https://raw.githubusercontent.com/Azure/azur
 COPY --chown=dev:dev \
     .zshrc \
     .p10k.zsh \
-    .gitconfig \
     .zsh_completion_just \
     .zsh_completion_kubectx \
     .zsh_completion_kubetail \
     /home/dev/
 
-# create some default directories
-RUN mkdir ~/src
+COPY --chown=dev:dev .gitconfig /home/dev/.config/git/config
 
 # This image comes with a pre-configured powerlevel10k theme. You need to ensure that you have the NerdFont MesloLGF
 # installed in your terminals for icons to be rendered correctly. If you want to configure your own options, just

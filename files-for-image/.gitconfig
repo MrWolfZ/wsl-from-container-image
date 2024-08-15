@@ -8,7 +8,7 @@ longpaths = true
 symlinks = true
 
 [credential]
-helper = /mnt/c/Users/jozi/AppData/Local/Programs/Git/mingw64/libexec/git-core/git-credential-manager.exe
+helper = git-credential-manager.exe
 
 [http]
 cookiefile = /home/dev/.gitcookies
