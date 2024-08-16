@@ -118,7 +118,9 @@ export NVM_DIR="$HOME/.nvm"
 # environment variables
 export GOBIN="$HOME/.local/bin/golang/bin"
 export CARGO_BIN="$HOME/.cargo/bin"
-export PATH="$PATH:$HOME/.local/bin:$GOBIN:$CARGO_BIN"
+LOCAL_BIN="$HOME/.local/bin"
+DOTNET_TOOLS="$HOME/.dotnet/tools"
+export PATH="$LOCAL_BIN:$GOBIN:$CARGO_BIN:$PATH:$DOTNET_TOOLS"
 
 # define a pager for unpaged git log
 export PAGER="less -F"

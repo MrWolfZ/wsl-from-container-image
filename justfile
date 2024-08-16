@@ -26,22 +26,39 @@ run:
   docker run -it --rm --name {{ name }} {{ img }} zsh
 
 export:
-  docker run --replace --name {{ name }} -d {{ img }} sleep infinity
+  docker rm -f {{ name }}
+  docker run --name {{ name }} -d {{ img }} sleep infinity
   docker export {{ name }} -o .build/{{ name }}.tar
   docker stop {{ name }} -t 1
   docker rm {{ name }}
 
 package:
-  tar czf wsl-{{ name }}.tar.gz -C .build/ .
-  rm -rf .build
+  cd .build && tar cf - ./ -P | pv -s $(du -sb .build/ | awk '{print $1}') | gzip > wsl-{{ name }}.tar.gz
 
 move-win:
   mkdir -p /mnt/c/wsl
+  rm -f /mnt/c/wsl/wsl-{{ name }}.tar
+  rm -f /mnt/c/wsl/wsl-{{ name }}*.cmd
+  mv ./build/* /mnt/c/wsl/
+
+move-package-win:
+  mkdir -p /mnt/c/wsl
   rm -f /mnt/c/wsl/wsl-{{ name }}.tar.gz
-  mv wsl-{{ name }}.tar.gz /mnt/c/wsl/
+  mv .build/wsl-{{ name }}.tar.gz /mnt/c/wsl/
 
 backup:
-  tar czf /mnt/c/wsl/src-backup.tar.gz --exclude venv --exclude .azure ~/src
+  mkdir -p /mnt/c/wsl
+  tar czf /mnt/c/wsl/src-backup.tar.gz \
+    --exclude venv \
+    --exclude .azure \
+    --exclude .build \
+    --exclude build \
+    --exclude bin \
+    --exclude obj \
+    --exclude .tmp \
+    --exclude tmp \
+    --exclude target \
+    ~/src
   cp /mnt/c/wsl/src-backup.tar.gz /mnt/c/wsl/src-backup-$(date +%Y-%m-%d).tar.gz
 
 restore:
