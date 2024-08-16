@@ -65,7 +65,7 @@ RUN apt-get update && \
     autoconf \
     automake \
     btrfs-progs \
-    crun \
+    build-essential \
     gcc \
     git \
     go-md2man \
@@ -74,6 +74,7 @@ RUN apt-get update && \
     libassuan-dev \
     libbtrfs-dev \
     libc6-dev \
+    libcap-dev \
     libdevmapper-dev \
     libglib2.0-dev \
     libgpg-error-dev \
@@ -84,8 +85,12 @@ RUN apt-get update && \
     libselinux1-dev \
     libsystemd-dev \
     libtool \
+    libyajl-dev \
     make \
+    passt \
     pkg-config \
+    pkgconf \
+    python3 \
     runc \
     slirp4netns \
     uidmap && \
@@ -191,8 +196,12 @@ RUN userdel ubuntu && \
     --shell $(which zsh) \
     --create-home && \
     usermod -aG sudo dev && \
-    # add bigger id ranges for the dev user for podman containers with a lot of files
-    usermod --add-subuids 100000-565536 --add-subgids 100000-565536 dev
+    # add bigger id ranges for the dev user for podman containers with
+    # a lot of files (note that we write directly to the files instead
+    # of using usermod since the latter creates multiple entries in the
+    # files, which breaks podman
+    echo "dev:100000:565536" > /etc/subgid && \
+    echo "dev:100000:565536" > /etc/subuid
 
 RUN chown -R dev:dev /home/dev/
 
@@ -240,37 +249,56 @@ RUN export GO_VERSION="1.23.0" && \
     rm go${GO_VERSION}.linux-amd64.tar.gz && \
     mv ~/.local/bin/go ~/.local/bin/golang
 
-# we build podman from source since the ubuntu repositories are often lagging behind
-RUN export PODMAN_VERSION="v5.2.1" && \
+# we build crun from source since the ubuntu repositories are often lagging behind
+RUN export CRUN_VERSION="1.16.1" && \
+    echo "changeme" | sudo -S mkdir -p /etc/containers && \
     cd ~/src && \
-    git clone https://github.com/containers/conmon && \
+    git clone https://github.com/containers/crun -b $CRUN_VERSION --depth 1 && \
+    cd crun && \
+    export GOCACHE="$PWD/.gocache" && \
+    ./autogen.sh && \
+    ./configure && \
+    make && \
+    echo "changeme" | sudo -S make install && \
+    git clean -d -x -f && \
+    echo "changeme" | sudo -S rm -rf /tmp/* && \
+    rm -rf ~/go
+
+# we build conmon from source since the ubuntu repositories are often lagging behind
+RUN export CONMON_VERSION="v2.1.12" && \
+    cd ~/src && \
+    git clone https://github.com/containers/conmon -b $CONMON_VERSION --depth 1 && \
     cd conmon && \
     export GOCACHE="$PWD/.gocache" && \
     make && \
     echo "changeme" | sudo -S make podman && \
     git clean -d -x -f && \
-    cd .. && \
-    echo "changeme" | sudo -S mkdir -p /etc/containers && \
-    git clone https://github.com/containers/podman.git -b $PODMAN_VERSION --depth=1 && \
+    echo "changeme" | sudo -S rm -rf /tmp/* && \
+    rm -rf ~/go
+
+# we build podman from source since the ubuntu repositories are often lagging behind
+RUN export PODMAN_VERSION="v5.2.1" && \
+    cd ~/src && \
+    git clone https://github.com/containers/podman -b $PODMAN_VERSION --depth 1 && \
     cd podman && \
     export GOCACHE="$PWD/.gocache" && \
     make BUILDTAGS="apparmor cni exclude_graphdriver_devicemapper selinux seccomp systemd" PREFIX=/usr && \
     echo "changeme" | sudo -S make install PREFIX=/usr && \
     git clean -d -x -f && \
     podman --version && \
-    echo "changeme" | sudo -S rm -rf /tmp/*
+    echo "changeme" | sudo -S rm -rf /tmp/* && \
+    rm -rf ~/go
 
-# these commands may be required as well, or only when running the container in docker / podman itself
-# chmod 4755 /usr/bin/newgidmap
-# chmod 4755 /usr/bin/newuidmap
-# sudo chmod u-s /usr/bin/new[gu]idmap
-# sudo setcap cap_setuid+eip /usr/bin/newuidmap
-# sudo setcap cap_setgid+eip /usr/bin/newgidmap
+# configure tools required by podman
+RUN echo "changeme" | sudo -S chmod u-s /usr/bin/new[gu]idmap && \
+    echo "changeme" | sudo -S setcap cap_setuid+eip /usr/bin/newuidmap && \
+    echo "changeme" | sudo -S setcap cap_setgid+eip /usr/bin/newgidmap
 
 COPY --chown=root:root containers.conf registries.conf policy.json /etc/containers/
 
 # enable the podman socket service so that other tools can use its docker-compatible API
-RUN systemctl enable --user podman.socket
+RUN echo "changeme" | sudo -S systemctl enable podman.socket && \
+    echo "changeme" | sudo -S systemctl enable podman.service
 
 # build dive from source (using a fork that fixes the scrolling bug), see
 # also here: https://github.com/wagoodman/dive/pull/520
@@ -279,158 +307,179 @@ RUN cd ~/src && \
     cd dive && \
     export GOCACHE="$PWD/.gocache" && \
     make bootstrap && \
+    echo $'\n\
+release:\n\
+  prerelease: auto\n\
+  draft: false\n\
+\n\
+builds:\n\
+- binary: dive\n\
+  env:\n\
+    - CGO_ENABLED=0\n\
+  goos:\n\
+    - linux\n\
+  goarch:\n\
+    - amd64\n\
+  ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.buildTime={{.Date}}`.\n\
+' > .goreleaser.yaml && \
     make build && \
     mv snapshot/dive_linux_amd64_v1/dive ~/.local/bin/dive && \
-    git clean -d -x -f
+    git clean -d -x -f && \
+    ~/.local/bin/dive --version && \
+    echo "changeme" | sudo -S rm -rf /tmp/* && \
+    echo "changeme" | sudo -S rm -rf ~/go
 
-COPY --chown=dev:dev dive-config.yaml /home/dev/.config/dive/config.yaml
-
-# # install tools for rust development
-# RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal && \
-#     ~/.cargo/bin/rustup component add rustfmt && \
-#     ~/.cargo/bin/rustup component add clippy && \
-#     ~/.cargo/bin/rustup target add x86_64-unknown-linux-musl && \
-#     ~/.cargo/bin/rustup target add aarch64-unknown-linux-musl && \
-#     ~/.cargo/bin/rustup install nightly --profile minimal && \
-#     ~/.cargo/bin/rustup +nightly component add rustfmt && \
-#     ~/.cargo/bin/rustup +nightly component add clippy && \
-#     ~/.cargo/bin/cargo install just
+# install tools for rust development
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal && \
+    ~/.cargo/bin/rustup component add rustfmt && \
+    ~/.cargo/bin/rustup component add clippy && \
+    ~/.cargo/bin/rustup target add x86_64-unknown-linux-musl && \
+    ~/.cargo/bin/rustup target add aarch64-unknown-linux-musl && \
+    ~/.cargo/bin/rustup install nightly --profile minimal && \
+    ~/.cargo/bin/rustup +nightly component add rustfmt && \
+    ~/.cargo/bin/rustup +nightly component add clippy && \
+    ~/.cargo/bin/cargo install just
 
 # install tools for container development
 
-# ## kubectl
-# RUN mkdir -p ~/.local/bin && \
-#     export KUBE_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt) && \
-#     curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/amd64/kubectl" && \
-#     curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/amd64/kubectl.sha256" && \
-#     echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check && rm kubectl.sha256 && \
-#     chmod +x kubectl && \
-#     mv ./kubectl ~/.local/bin/kubectl
+## kubectl
+RUN export KUBE_VERSION="v1.31.0" && \
+    mkdir -p ~/.local/bin && \
+    curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/amd64/kubectl" && \
+    curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/amd64/kubectl.sha256" && \
+    echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check && rm kubectl.sha256 && \
+    chmod +x kubectl && \
+    mv ./kubectl ~/.local/bin/kubectl
 
-# ## helm
-# RUN mkdir -p ~/.local/bin && \
-#     curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && \
-#     chmod 700 get_helm.sh && \
-#     HELM_INSTALL_DIR=~/.local/bin PATH=$PATH:~/.local/bin ./get_helm.sh --no-sudo && \
-#     rm -f get_helm.sh
+## helm
+RUN export HELM_VERSION="v3.15.4" && \
+    mkdir -p ~/.local/bin && \
+    curl -LO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz" && \
+    curl -LO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz.sha256sum" && \
+    sha256sum --check helm*.sha256sum && rm helm*.sha256sum && \
+    mkdir helm && \
+    tar xzf helm*.tar.gz -C ./helm && \
+    mv ./helm/linux-amd64/helm ~/.local/bin/helm && \
+    rm helm*.tar.gz && \
+    rm -rf helm && \
+    ~/.local/bin/helm version
 
-# ## kubetail
-# RUN cd ~/.oh-my-zsh/custom/plugins/ && \
-#     git clone https://github.com/johanhaleby/kubetail.git kubetail
+## kubetail
+RUN cd ~/.oh-my-zsh/custom/plugins/ && \
+    git clone https://github.com/johanhaleby/kubetail.git kubetail
 
-# ## kubectx and kubens
-# RUN cd ~/.oh-my-zsh/custom/plugins/ && \
-#     git clone https://github.com/ahmetb/kubectx.git kubectx
+## kubectx and kubens
+RUN cd ~/.oh-my-zsh/custom/plugins/ && \
+    git clone https://github.com/ahmetb/kubectx.git kubectx
 
-# ## kubelogin
-# RUN export KUBELOGIN_VERSION="v0.0.34" && \
-#     export GOCACHE="/tmp/.gocache" && \
-#     mkdir -p ~/.local/bin && \
-#     curl -LO "https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip" && \
-#     curl -LO "https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip.sha256" && \
-#     cat kubelogin-linux-amd64.zip.sha256 | sha256sum --check && \
-#     rm kubelogin-linux-amd64.zip.sha256 && \
-#     unzip kubelogin-linux-amd64.zip -d ./kubelogin && \
-#     rm kubelogin-linux-amd64.zip && \
-#     chmod +x kubelogin/bin/linux_amd64/kubelogin && \
-#     mv ./kubelogin/bin/linux_amd64/kubelogin ~/.local/bin/kubelogin && \
-#     rm -rf ./kubelogin && \
-#     ~/.local/bin/kubelogin --version && \
-#     rm -rf $GOCACHE
+## kubelogin
+RUN export KUBELOGIN_VERSION="v0.1.4" && \
+    export GOCACHE="/tmp/.gocache" && \
+    mkdir -p ~/.local/bin && \
+    curl -LO "https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip" && \
+    curl -LO "https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip.sha256" && \
+    cat kubelogin-linux-amd64.zip.sha256 | sha256sum --check && \
+    rm kubelogin-linux-amd64.zip.sha256 && \
+    unzip kubelogin-linux-amd64.zip -d ./kubelogin && \
+    rm kubelogin-linux-amd64.zip && \
+    chmod +x kubelogin/bin/linux_amd64/kubelogin && \
+    mv ./kubelogin/bin/linux_amd64/kubelogin ~/.local/bin/kubelogin && \
+    rm -rf ./kubelogin && \
+    ~/.local/bin/kubelogin --version && \
+    rm -rf $GOCACHE
 
-# ## Cluster API
-# ARG CLUSTER_API_VERSION="v1.5.3"
-# RUN mkdir -p ~/.local/bin && \
-#     curl -Lo clusterctl "https://github.com/kubernetes-sigs/cluster-api/releases/download/${CLUSTER_API_VERSION}/clusterctl-linux-amd64" && \
-#     chmod +x clusterctl && \
-#     mv ./clusterctl ~/.local/bin/clusterctl && \
-#     ~/.local/bin/clusterctl version
+## Cluster API
+RUN export CLUSTER_API_VERSION="v1.8.1" && \
+    mkdir -p ~/.local/bin && \
+    curl -Lo clusterctl "https://github.com/kubernetes-sigs/cluster-api/releases/download/${CLUSTER_API_VERSION}/clusterctl-linux-amd64" && \
+    chmod +x clusterctl && \
+    mv ./clusterctl ~/.local/bin/clusterctl && \
+    ~/.local/bin/clusterctl version
 
-# ## cilium
-# RUN mkdir -p ~/.local/bin && \
-#     export CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt) && \
-#     export CLI_ARCH=amd64 && \
-#     curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum} && \
-#     sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum && \
-#     tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz ~/.local/bin && \
-#     rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum} && \
-#     ~/.local/bin/cilium version --client
+## cilium
+RUN export CILIUM_CLI_VERSION="v0.16.15" && \
+    export CLI_ARCH=amd64 && \
+    mkdir -p ~/.local/bin && \
+    curl -L --fail --remote-name-all "https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}" && \
+    sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum && \
+    tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz ~/.local/bin && \
+    rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum} && \
+    ~/.local/bin/cilium version --client
 
-# ## hubble
-# RUN mkdir -p ~/.local/bin && \
-#     export HUBBLE_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt) && \
-#     export HUBBLE_ARCH=amd64 && \
-#     curl -L --fail --remote-name-all https://github.com/cilium/hubble/releases/download/$HUBBLE_VERSION/hubble-linux-${HUBBLE_ARCH}.tar.gz{,.sha256sum} && \
-#     sha256sum --check hubble-linux-${HUBBLE_ARCH}.tar.gz.sha256sum && \
-#     tar xzvfC hubble-linux-${HUBBLE_ARCH}.tar.gz ~/.local/bin && \
-#     rm hubble-linux-${HUBBLE_ARCH}.tar.gz{,.sha256sum} && \
-#     ~/.local/bin/hubble --version
+## hubble
+RUN export HUBBLE_VERSION="v1.16.0" && \
+    export HUBBLE_ARCH=amd64 && \
+    mkdir -p ~/.local/bin && \
+    curl -L --fail --remote-name-all "https://github.com/cilium/hubble/releases/download/$HUBBLE_VERSION/hubble-linux-${HUBBLE_ARCH}.tar.gz{,.sha256sum}" && \
+    sha256sum --check hubble-linux-${HUBBLE_ARCH}.tar.gz.sha256sum && \
+    tar xzvfC hubble-linux-${HUBBLE_ARCH}.tar.gz ~/.local/bin && \
+    rm hubble-linux-${HUBBLE_ARCH}.tar.gz{,.sha256sum} && \
+    ~/.local/bin/hubble --version
 
-# ## kind
-# ARG KIND_VERSION="v0.20.0"
-# RUN mkdir -p ~/.local/bin && \
-#     curl -Lo ./kind https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64 && \
-#     chmod +x ./kind && \
-#     mv ./kind ~/.local/bin/kind && \
-#     ~/.local/bin/kind --version
+## kind
+RUN export KIND_VERSION="v0.24.0" && \
+    mkdir -p ~/.local/bin && \
+    curl -Lo ./kind "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64" && \
+    chmod +x ./kind && \
+    mv ./kind ~/.local/bin/kind && \
+    ~/.local/bin/kind --version
 
-# ## kubebuilder
-# RUN mkdir -p ~/.local/bin && \
-#     curl -L -o kubebuilder https://go.kubebuilder.io/dl/latest/$(~/.local/bin/golang/bin/go env GOOS)/$(~/.local/bin/golang/bin/go env GOARCH) && \
-#     chmod +x ./kubebuilder && \
-#     mv ./kubebuilder ~/.local/bin/kubebuilder && \
-#     ~/.local/bin/kubebuilder version
+## kubebuilder
+RUN export KUBEBUILDER_VERSION="v4.1.1" && \
+    mkdir -p ~/.local/bin && \
+    curl -L -o kubebuilder "https://github.com/kubernetes-sigs/kubebuilder/releases/download/${KUBEBUILDER_VERSION}/kubebuilder_linux_amd64" && \
+    chmod +x ./kubebuilder && \
+    mv ./kubebuilder ~/.local/bin/kubebuilder && \
+    ~/.local/bin/kubebuilder version
 
-# ## vault
-# ARG VAULT_VERSION=1.15.4
-# RUN mkdir -p ~/.local/bin && \
-#     curl -L -o vault.zip https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip && \
-#     unzip vault.zip -d ./vault && \
-#     rm vault.zip && \
-#     chmod +x vault/vault && \
-#     mv ./vault/vault ~/.local/bin/vault && \
-#     rm -rf ./vault && \
-#     ~/.local/bin/vault --version
+## vault
+RUN export VAULT_VERSION="1.17.3" && \
+    mkdir -p ~/.local/bin && \
+    curl -L -o vault.zip "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip" && \
+    unzip vault.zip -d ./vault && \
+    rm vault.zip && \
+    chmod +x vault/vault && \
+    mv ./vault/vault ~/.local/bin/vault && \
+    rm -rf ./vault && \
+    ~/.local/bin/vault --version
 
-# ## kubeseal
-# ARG KUBESEAL_VERSION=0.24.4
-# RUN mkdir -p ~/.local/bin && \
-#     curl -L -o kubeseal.tar.gz https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz && \
-#     tar -xvzf kubeseal.tar.gz kubeseal && \
-#     rm kubeseal.tar.gz && \
-#     chmod +x kubeseal && \
-#     mv ./kubeseal ~/.local/bin/kubeseal && \
-#     ~/.local/bin/kubeseal --version
+## kubeseal
+RUN export KUBESEAL_VERSION="0.27.1" && \
+    mkdir -p ~/.local/bin && \
+    curl -L -o kubeseal.tar.gz "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz" && \
+    tar -xvzf kubeseal.tar.gz kubeseal && \
+    rm kubeseal.tar.gz && \
+    chmod +x kubeseal && \
+    mv ./kubeseal ~/.local/bin/kubeseal && \
+    ~/.local/bin/kubeseal --version
 
-# ## lazydocker
-# ARG LAZYDOCKER_VERSION=0.23.1
-# RUN mkdir -p ~/.local/bin && \
-#     curl -L -o lazydocker.tar.gz https://github.com/jesseduffield/lazydocker/releases/download/v${LAZYDOCKER_VERSION}/lazydocker_${LAZYDOCKER_VERSION}_Linux_x86_64.tar.gz && \
-#     tar -xvzf lazydocker.tar.gz lazydocker && \
-#     rm lazydocker.tar.gz && \
-#     chmod +x lazydocker && \
-#     mv ./lazydocker ~/.local/bin/lazydocker && \
-#     ~/.local/bin/lazydocker --version
+## lazydocker
+RUN export LAZYDOCKER_VERSION="0.23.3" && \
+    mkdir -p ~/.local/bin && \
+    curl -L -o lazydocker.tar.gz "https://github.com/jesseduffield/lazydocker/releases/download/v${LAZYDOCKER_VERSION}/lazydocker_${LAZYDOCKER_VERSION}_Linux_x86_64.tar.gz" && \
+    tar -xvzf lazydocker.tar.gz lazydocker && \
+    rm lazydocker.tar.gz && \
+    chmod +x lazydocker && \
+    mv ./lazydocker ~/.local/bin/lazydocker && \
+    ~/.local/bin/lazydocker --version
 
-# ## minio CLI
-# RUN mkdir -p ~/.local/bin && \
-#     curl -LO https://dl.min.io/client/mc/release/linux-amd64/mc && \
-#     chmod +x mc && \
-#     mv mc ~/.local/bin/ && \
-#     ~/.local/bin/mc --version
-
-## azure CLI completions
-RUN curl -L -o ~/.zsh_completion_az https://raw.githubusercontent.com/Azure/azure-cli/dev/az.completion
+## minio CLI
+RUN mkdir -p ~/.local/bin && \
+    curl -LO https://dl.min.io/client/mc/release/linux-amd64/mc && \
+    chmod +x mc && \
+    mv mc ~/.local/bin/ && \
+    ~/.local/bin/mc --version
 
 COPY --chown=dev:dev \
     .zshrc \
     .p10k.zsh \
-    .zsh_completion_just \
-    .zsh_completion_kubectx \
-    .zsh_completion_kubetail \
     /home/dev/
 
-COPY --chown=dev:dev .gitconfig /home/dev/.config/git/config
+COPY --chown=dev:dev .config/ /home/dev/.config/
+COPY --chown=dev:dev .completions/ /home/dev/.completions/
+
+## azure CLI completions
+RUN curl -L -o ~/.completions/.zsh_completion_az https://raw.githubusercontent.com/Azure/azure-cli/dev/az.completion
 
 # This image comes with a pre-configured powerlevel10k theme. You need to ensure that you have the NerdFont MesloLGF
 # installed in your terminals for icons to be rendered correctly. If you want to configure your own options, just

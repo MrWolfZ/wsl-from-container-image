@@ -25,10 +25,10 @@ wsl -d @@ name @ -u root /bin/bash -c "echo :WSLInterop:M::MZ::/init:PF > /usr/l
 wsl -d @@ name @ -u root systemctl restart systemd-binfmt > nul 2>&1
 call :CHECK_FAIL
 echo Run apt-get update...
-wsl -d @@ name @ -u root apt-get update
+wsl -d @@ name @ -u root apt-get update > nul 2>&1
 call :CHECK_FAIL
-echo Please configure a new password (the current one is 'changeme'):
-wsl -d @@ name @ passwd
+echo Please configure a new password
+wsl -d @@ name @ -u root passwd dev
 call :CHECK_FAIL
 wsl -d @@ name @ --cd ~
 

@@ -143,15 +143,14 @@ export ZSH_AUTOSUGGEST_MANUAL_REBIND='false' # can be set to true for better per
 export ZSH_AUTOSUGGEST_HISTORY_IGNORE="?(#c200,)" # ignore history entries that are longer than 200 characters
 
 # completion scripts
-[ ! -f "$HOME/.zsh_completion_kubectl" ] && kubectl completion zsh > "$HOME/.zsh_completion_kubectl"
-source "$HOME/.zsh_completion_kubectl"
+[ ! -f "$HOME/.completions/.zsh_completion_kubectl" ] && kubectl completion zsh > "$HOME/.completions/.zsh_completion_kubectl"
+source "$HOME/.completions/.zsh_completion_kubectl"
 
-source "$HOME/.zsh_completion_kubectx"
-source "$HOME/.zsh_completion_kubetail"
-
-source "$HOME/.zsh_completion_just"
-
-source "$HOME/.zsh_completion_az"
+source "$HOME/.completions/.zsh_completion_az"
+source "$HOME/.completions/.zsh_completion_just"
+source "$HOME/.completions/.zsh_completion_kubectx"
+source "$HOME/.completions/.zsh_completion_kubetail"
+source "$HOME/.completions/.zsh_completion_podman"
 
 # aliases
 alias k='kubectl'

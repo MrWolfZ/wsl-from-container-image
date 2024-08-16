@@ -1,6 +1,5 @@
 # TODO
 
 - add fonts to repo
-- ensure .gitconfig is correctly adjusted
-- move completions into subfolder
-- update all tool versions
+- pull tool installations and updates into a dedicated script that can be repeated after import to update tools
+- use podman instead of docker to build the image
