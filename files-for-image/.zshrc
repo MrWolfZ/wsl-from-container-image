@@ -142,6 +142,8 @@ export ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE='50' # only show suggestions when the com
 export ZSH_AUTOSUGGEST_MANUAL_REBIND='false' # can be set to true for better performance, but has caused random error messages for me
 export ZSH_AUTOSUGGEST_HISTORY_IGNORE="?(#c200,)" # ignore history entries that are longer than 200 characters
 
+export HOST_IP="$(ip route show | grep -i default | awk '{ print $3 }')"
+
 # completion scripts
 [ ! -f "$HOME/.completions/.zsh_completion_kubectl" ] && kubectl completion zsh > "$HOME/.completions/.zsh_completion_kubectl"
 source "$HOME/.completions/.zsh_completion_kubectl"
