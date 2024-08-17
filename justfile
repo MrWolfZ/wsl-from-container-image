@@ -1,6 +1,8 @@
 name := "ubuntu-24.04"
 img := "wsl:" + name
 
+container_tool := "docker"
+
 default:
   just --list --unsorted
 
@@ -18,19 +20,19 @@ build:
 
   sed 's/@@ name @/{{ replace(name, ".", "-") }}/g' files-for-image/wsl.conf > files-for-image/wsl.conf.copy
 
-  docker build files-for-image -f wsl.Containerfile --tag {{ img }}
+  {{ container_tool }} build files-for-image -f wsl.Containerfile --tag {{ img }}
 
   rm files-for-image/wsl.conf.copy
 
 run:
-  docker run -it --rm --name {{ name }} {{ img }} zsh
+  {{ container_tool }} run -it --rm --name {{ name }} {{ img }} zsh
 
 export:
-  docker rm -f {{ name }} > /dev/null 2>&1
-  docker run --name {{ name }} -d {{ img }} sleep infinity
-  docker export {{ name }} -o .build/{{ name }}.tar
-  docker stop {{ name }} -t 1
-  docker rm {{ name }}
+  {{ container_tool }} rm -f {{ name }} > /dev/null 2>&1
+  {{ container_tool }} run --name {{ name }} -d {{ img }} sleep infinity
+  {{ container_tool }} export {{ name }} -o .build/{{ name }}.tar
+  {{ container_tool }} stop {{ name }} -t 1
+  {{ container_tool }} rm {{ name }}
 
 package:
   cd .build && tar cf - ./ -P | pv -s $(du -sb .build/ | awk '{print $1}') | gzip > wsl-{{ name }}.tar.gz
@@ -39,7 +41,7 @@ install:
   mkdir -p /mnt/c/wsl
   rm -f /mnt/c/wsl/{{ name }}.tar
   rm -f /mnt/c/wsl/{{ name }}*.cmd
-  rsync -ah --progress .build/* /mnt/c/wsl/
+  rsync -ah --info=progress2 .build/ /mnt/c/wsl/
 
 install-package:
   mkdir -p /mnt/c/wsl
@@ -47,9 +49,8 @@ install-package:
   mv .build/wsl-{{ name }}.tar.gz /mnt/c/wsl/
 
 backup:
-  mkdir -p /mnt/c/wsl
-  rm -f /mnt/c/wsl/src-backup.tar.gz
-  tar czf /mnt/c/wsl/src-backup.tar.gz \
+  rm ~/backup.tar
+  cd ~ && tar cf backup.tar \
     --exclude venv \
     --exclude .azure \
     --exclude .build \
@@ -59,10 +60,22 @@ backup:
     --exclude .tmp \
     --exclude tmp \
     --exclude target \
-    ~/src
-  cp /mnt/c/wsl/src-backup.tar.gz /mnt/c/wsl/src-backup-$(date +%Y-%m-%d).tar.gz
+    --exclude node_modules \
+    src
+
+  cd ~ && tar rf backup.tar \
+    .completions \
+    .config \
+    .p10k.zsh \
+    .zsh_history \
+    .zshrc
+
+  mkdir -p /mnt/c/wsl
+  rm -f /mnt/c/wsl/backup.tar
+  cp ~/backup.tar ~/backup-$(date +%Y-%m-%d).tar
+  mv ~/backup*.tar /mnt/c/wsl/
 
 restore:
-  cp /mnt/c/wsl/src-backup.tar.gz ~/
-  tar xzf ~/src-backup.tar.gz ~/src
-  rm ~/src-backup.tar.gz
+  cp /mnt/c/wsl/backup.tar ~/
+  tar xf ~/backup.tar -C ~/
+  rm ~/backup.tar

@@ -1,2 +1,2 @@
 [wsl2]
-kernelCommandLine = cgroup_no_v1=all
+kernelCommandLine=cgroup_no_v1=all

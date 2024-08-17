@@ -49,15 +49,21 @@ RUN apt-get update && \
     gnupg \
     htop \
     lsb-release \
-    pv \
     nano \
+    openssh-server \
+    pv \
     unzip \
+    zip \
     zsh && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/debconf/* && \
     rm -rf /var/cache/swcatalog/* && \
     rm -rf /var/log/* && \
     rm -rf /var/lib/command-not-found
+
+# configure SSH
+RUN systemctl enable ssh && \
+    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
 
 # install tools for C development (useful for bulding other projects from source)
 RUN apt-get update && \
@@ -297,8 +303,8 @@ RUN echo "changeme" | sudo -S chmod u-s /usr/bin/new[gu]idmap && \
 COPY --chown=root:root containers.conf registries.conf policy.json /etc/containers/
 
 # enable the podman socket service so that other tools can use its docker-compatible API
-RUN echo "changeme" | sudo -S systemctl enable podman.socket && \
-    echo "changeme" | sudo -S systemctl enable podman.service
+RUN systemctl enable --user podman.socket && \
+    systemctl enable --user podman.service
 
 # build dive from source (using a fork that fixes the scrolling bug), see
 # also here: https://github.com/wagoodman/dive/pull/520
@@ -307,21 +313,8 @@ RUN cd ~/src && \
     cd dive && \
     export GOCACHE="$PWD/.gocache" && \
     make bootstrap && \
-    echo $'\n\
-release:\n\
-  prerelease: auto\n\
-  draft: false\n\
-\n\
-builds:\n\
-- binary: dive\n\
-  env:\n\
-    - CGO_ENABLED=0\n\
-  goos:\n\
-    - linux\n\
-  goarch:\n\
-    - amd64\n\
-  ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.buildTime={{.Date}}`.\n\
-' > .goreleaser.yaml && \
+    echo "release: { prerelease: auto, draft: false }" > .goreleaser.yaml && \
+    echo "builds: [{ binary: dive, env: [CGO_ENABLED=0], goos: [linux], goarch: [amd64], ldflags: '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.buildTime={{.Date}}' }]" >> .goreleaser.yaml && \
     make build && \
     mv snapshot/dive_linux_amd64_v1/dive ~/.local/bin/dive && \
     git clean -d -x -f && \

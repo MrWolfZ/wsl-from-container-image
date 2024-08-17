@@ -1,26 +1,8 @@
-[alias]
-jedi = push --force
-
-[core]
-autocrlf = false
-safecrlf = false
-longpaths = true
-symlinks = true
-
 [credential]
-helper = git-credential-manager.exe
+helper = git-credential-manager.exe # needs to be adjusted with correct path
 
 [http]
 cookiefile = /home/dev/.gitcookies
 
 [init]
 defaultBranch = main
-
-[pull]
-rebase = preserve
-
-[push]
-autoSetupRemote = true
-
-[rerere]
-enabled = true
