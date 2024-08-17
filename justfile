@@ -1,7 +1,7 @@
 name := "ubuntu-24.04"
 img := "wsl:" + name
 
-container_tool := "docker"
+container_tool := "podman"
 
 default:
   just --list --unsorted
@@ -20,7 +20,7 @@ build:
 
   sed 's/@@ name @/{{ replace(name, ".", "-") }}/g' files-for-image/wsl.conf > files-for-image/wsl.conf.copy
 
-  {{ container_tool }} build files-for-image -f wsl.Containerfile --tag {{ img }}
+  {{ container_tool }} build{{ if container_tool == "podman" { " --format=docker" } else { "" } }} files-for-image -f wsl.Containerfile --tag {{ img }}
 
   rm files-for-image/wsl.conf.copy
 
@@ -77,5 +77,5 @@ backup:
 
 restore:
   cp /mnt/c/wsl/backup.tar ~/
-  tar xf ~/backup.tar -C ~/
+  tar xf ~/backup.tar -C ~/.backup-restore
   rm ~/backup.tar
