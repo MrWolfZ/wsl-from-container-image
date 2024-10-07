@@ -156,6 +156,7 @@ source "$HOME/.completions/.zsh_completion_podman"
 
 # aliases
 alias k='kubectl'
+alias p='podman'
 alias ll='ls -alh --color=auto'
 alias kubectx=$ZSH/custom/plugins/kubectx/kubectx
 alias kubens=$ZSH/custom/plugins/kubectx/kubens
