@@ -26,6 +26,7 @@ wsl -d @@ name @ -u root /bin/bash -c "echo :WSLInterop:M::MZ::/init:PF > /usr/l
 wsl -d @@ name @ -u root systemctl restart systemd-binfmt > nul 2>&1
 call :CHECK_FAIL
 echo Generating SSH key
+mkdir -p /mnt/c/Users/%USERNAME%/.ssh > nul 2>&1
 wsl -d @@ name @ ssh-keygen -b 2048 -t rsa -f /mnt/c/Users/%USERNAME%/.ssh/id_rsa_@@ name @ -q -N "" > nul 2>&1
 wsl -d @@ name @ mkdir -p ~/.ssh > nul 2>&1
 wsl -d @@ name @ bash -c "cat /mnt/c/Users/%USERNAME%/.ssh/id_rsa_@@ name @.pub >> ~/.ssh/authorized_keys" > nul 2>&1

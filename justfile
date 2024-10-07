@@ -49,7 +49,7 @@ install-package:
   mv .build/wsl-{{ name }}.tar.gz /mnt/c/wsl/
 
 backup:
-  rm ~/backup.tar
+  rm -f ~/backup.tar
   cd ~ && tar cf backup.tar \
     --exclude venv \
     --exclude .azure \
@@ -77,5 +77,6 @@ backup:
 
 restore:
   cp /mnt/c/wsl/backup.tar ~/
+  mkdir ~/.backup-restore
   tar xf ~/backup.tar -C ~/.backup-restore
   rm ~/backup.tar

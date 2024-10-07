@@ -4,9 +4,6 @@ FROM ubuntu:24.04
 RUN export TIMEZONE=Europe/Zurich && \
     export DEBIAN_FRONTEND=noninteractive && \
     \
-    # the ubuntu images come minimized, so let's revert that to get a full-fledged environment
-    yes | unminimize && \
-    \
     # during later steps ubuntu wants to know the console encoding interactively, so we pre-populate it
     echo "console-setup   console-setup/charmap47 select  UTF-8" > encoding.conf && \
     debconf-set-selections encoding.conf && \
