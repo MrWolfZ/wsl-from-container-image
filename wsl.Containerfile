@@ -1,11 +1,8 @@
-FROM ubuntu:22.04
-ARG TIMEZONE=Europe/Zurich
+FROM ubuntu:24.04
 
 # create an initial fully upgraded ubuntu installation
-RUN export DEBIAN_FRONTEND=noninteractive && \
-    \
-    # the ubuntu images come minimized, so let's revert that to get a full-fledged environment
-    yes | unminimize && \
+RUN export TIMEZONE=Europe/Zurich && \
+    export DEBIAN_FRONTEND=noninteractive && \
     \
     # during later steps ubuntu wants to know the console encoding interactively, so we pre-populate it
     echo "console-setup   console-setup/charmap47 select  UTF-8" > encoding.conf && \
@@ -22,14 +19,18 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get upgrade -y && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/debconf/* && \
+    rm -rf /var/cache/swcatalog/* && \
+    rm -rf /var/log/* && \
     rm -rf /var/lib/command-not-found
 
 # configure additional OS settings
-RUN export DEBIAN_FRONTEND=noninteractive && \
+RUN export TIMEZONE=Europe/Zurich && \
+    export DEBIAN_FRONTEND=noninteractive && \
     locale-gen "en_US" && \
     locale-gen "en_US.UTF-8" && \
     dpkg-reconfigure locales && \
-    update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+    update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 && \
+    rm -rf /var/cache/debconf/*
 
 # install general tools
 RUN apt-get update && \
@@ -46,68 +47,72 @@ RUN apt-get update && \
     htop \
     lsb-release \
     nano \
+    openssh-server \
+    pv \
     unzip \
+    zip \
     zsh && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/debconf/* && \
+    rm -rf /var/cache/swcatalog/* && \
+    rm -rf /var/log/* && \
     rm -rf /var/lib/command-not-found
+
+# configure SSH
+RUN systemctl enable ssh && \
+    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
 
 # install tools for C development (useful for bulding other projects from source)
 RUN apt-get update && \
     apt-get install -y \
+    autoconf \
+    automake \
+    btrfs-progs \
+    build-essential \
     gcc \
     git \
+    go-md2man \
+    golang-go \
+    iptables \
+    libassuan-dev \
+    libbtrfs-dev \
     libc6-dev \
+    libcap-dev \
+    libdevmapper-dev \
     libglib2.0-dev \
-    libglib2.0-dev \
+    libgpg-error-dev \
+    libgpgme-dev \
+    libprotobuf-c-dev \
+    libprotobuf-dev \
     libseccomp-dev \
-    libseccomp-dev \
+    libselinux1-dev \
     libsystemd-dev \
+    libtool \
+    libyajl-dev \
     make \
+    passt \
     pkg-config \
-    runc && \
+    pkgconf \
+    python3 \
+    runc \
+    slirp4netns \
+    uidmap && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/debconf/* && \
+    rm -rf /var/cache/swcatalog/* && \
+    rm -rf /var/log/* && \
     rm -rf /var/lib/command-not-found
 
-# install tools for container development; we use the kubic project for installing podman and buildah
-# (as described here: https://podman.io/docs/installation#debian) since the versions in the official
-# ubuntu repositories are horribly outdated
-COPY containers-apt-preferences.txt /etc/apt/preferences.d/containers
-RUN mkdir -p /etc/apt/keyrings && \
-    # install Debian Unstable/Sid repository
-    curl -fsSL https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Unstable/Release.key \
-    | gpg --dearmor \
-    | sudo tee /etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg > /dev/null && \
-    echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg]\
-    https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Unstable/ /" \
-    | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list > /dev/null && \
-    # finally, install the tools
-    apt-get update && \
-    apt-get install -y \
-    containernetworking-plugins \
-    buildah \
-    podman && \
+# install tools for Azure development
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/debconf/* && \
-    rm -rf /var/lib/command-not-found && \
-    export DIVE_VERSION=$(curl -sL "https://api.github.com/repos/wagoodman/dive/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/') && \
-    curl -OL https://github.com/wagoodman/dive/releases/download/v${DIVE_VERSION}/dive_${DIVE_VERSION}_linux_amd64.deb && \
-    apt install ./dive_${DIVE_VERSION}_linux_amd64.deb && \
-    rm ./dive_${DIVE_VERSION}_linux_amd64.deb
-
-# enable the podman socket service so that other tools can use its docker-compatible API
-RUN systemctl enable --user podman.socket
-
-# install tools for Azure development
-RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+    rm -rf /var/cache/swcatalog/* && \
+    rm -rf /var/log/* && \
+    rm -rf /var/lib/command-not-found
 
 # install tools for dotnet development
-COPY dotnet-apt-preferences.txt /etc/apt/preferences.d/dotnet
-RUN wget https://packages.microsoft.com/config/ubuntu/$(lsb_release -r -s)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
-    dpkg -i packages-microsoft-prod.deb && \
-    rm packages-microsoft-prod.deb && \
+RUN add-apt-repository ppa:dotnet/backports && \
     apt-get update && \
     apt-get install -y \
     dotnet-sdk-6.0 \
@@ -115,15 +120,19 @@ RUN wget https://packages.microsoft.com/config/ubuntu/$(lsb_release -r -s)/packa
     dotnet-sdk-8.0 && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/debconf/* && \
+    rm -rf /var/cache/swcatalog/* && \
+    rm -rf /var/log/* && \
     rm -rf /var/lib/command-not-found
 
 # install tools for java development
 RUN apt-get update && \
     apt-get install -y \
-    openjdk-11-jdk \
-    openjdk-17-jdk && \
+    openjdk-17-jdk \
+    openjdk-21-jdk && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/debconf/* && \
+    rm -rf /var/cache/swcatalog/* && \
+    rm -rf /var/log/* && \
     rm -rf /var/lib/command-not-found
 
 # install tools for rust development
@@ -139,6 +148,8 @@ RUN apt-get update && \
     qemu-user-static && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/debconf/* && \
+    rm -rf /var/cache/swcatalog/* && \
+    rm -rf /var/log/* && \
     rm -rf /var/lib/command-not-found
 
 # install tools for python development
@@ -151,6 +162,18 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
     python3.12-venv && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/debconf/* && \
+    rm -rf /var/cache/swcatalog/* && \
+    rm -rf /var/log/* && \
+    rm -rf /var/lib/command-not-found
+
+# install tool to create user (specifically mkpasswd included in the whois package
+RUN apt-get update && \
+    apt-get install -y \
+    whois && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/debconf/* && \
+    rm -rf /var/cache/swcatalog/* && \
+    rm -rf /var/log/* && \
     rm -rf /var/lib/command-not-found
 
 # run one last upgrade to ensure everything is up to date
@@ -158,25 +181,40 @@ RUN apt-get update && \
     apt-get upgrade -y && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/debconf/* && \
+    rm -rf /var/cache/swcatalog/* && \
+    rm -rf /var/log/* && \
     rm -rf /var/lib/command-not-found
 
 COPY wsl.conf.copy /etc/wsl.conf
 
-# create a dedicated user
-RUN --mount=type=secret,id=dev_passwd \
+# delete the default ubuntu user and create a dedicated dev user
+RUN userdel ubuntu && \
+    rm -rf /home/ubuntu && \
+    export PASSWORD=$(mkpasswd -m sha512crypt changeme) && \
     groupadd dev --gid 1000 && \
     useradd dev \
     --uid 1000 \
     --gid 1000 \
-    --password $(cat /run/secrets/dev_passwd) \
+    --password $PASSWORD \
     --shell $(which zsh) \
     --create-home && \
-    usermod -aG sudo dev
+    usermod -aG sudo dev && \
+    # add bigger id ranges for the dev user for podman containers with
+    # a lot of files (note that we write directly to the files instead
+    # of using usermod since the latter creates multiple entries in the
+    # files, which breaks podman
+    echo "dev:100000:565536" > /etc/subgid && \
+    echo "dev:100000:565536" > /etc/subuid
+
+RUN chown -R dev:dev /home/dev/
 
 # run the rest of the setup as the dev user
 USER dev
 SHELL ["/bin/bash", "-c"]
 WORKDIR /home/dev
+
+# create some default directories
+RUN mkdir ~/src
 
 # configure shell
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
@@ -200,19 +238,86 @@ RUN mkdir -p ~/.local/bin && \
     echo -e "strict_env\nDIRENV_LOG_FORMAT=" | tee ~/.config/direnv/direnvrc
 
 # install tools for node development
-ARG NVM_VERSION=v0.39.7
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash && \
+RUN export NVM_VERSION="v0.40.0" && \
+    curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh" | bash && \
     source .nvm/nvm.sh && \
     nvm install stable && \
     nvm install --lts
 
 # install tools for go development (rename go dir to golang to work around `make` issue when a `go` dir is in path)
-ARG GO_VERSION=1.21.5
-RUN mkdir -p ~/.local/bin && \
-    curl -OL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
+RUN export GO_VERSION="1.23.0" && \
+    mkdir -p ~/.local/bin && \
+    curl -OL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" && \
     tar -C ~/.local/bin -xvf go${GO_VERSION}.linux-amd64.tar.gz && \
     rm go${GO_VERSION}.linux-amd64.tar.gz && \
     mv ~/.local/bin/go ~/.local/bin/golang
+
+# we build crun from source since the ubuntu repositories are often lagging behind
+RUN export CRUN_VERSION="1.16.1" && \
+    echo "changeme" | sudo -S mkdir -p /etc/containers && \
+    cd ~/src && \
+    git clone https://github.com/containers/crun -b $CRUN_VERSION --depth 1 && \
+    cd crun && \
+    export GOCACHE="$PWD/.gocache" && \
+    ./autogen.sh && \
+    ./configure && \
+    make && \
+    echo "changeme" | sudo -S make install && \
+    git clean -d -x -f && \
+    echo "changeme" | sudo -S rm -rf /tmp/* && \
+    rm -rf ~/go
+
+# we build conmon from source since the ubuntu repositories are often lagging behind
+RUN export CONMON_VERSION="v2.1.12" && \
+    cd ~/src && \
+    git clone https://github.com/containers/conmon -b $CONMON_VERSION --depth 1 && \
+    cd conmon && \
+    export GOCACHE="$PWD/.gocache" && \
+    make && \
+    echo "changeme" | sudo -S make podman && \
+    git clean -d -x -f && \
+    echo "changeme" | sudo -S rm -rf /tmp/* && \
+    rm -rf ~/go
+
+# we build podman from source since the ubuntu repositories are often lagging behind
+RUN export PODMAN_VERSION="v5.2.1" && \
+    cd ~/src && \
+    git clone https://github.com/containers/podman -b $PODMAN_VERSION --depth 1 && \
+    cd podman && \
+    export GOCACHE="$PWD/.gocache" && \
+    make BUILDTAGS="apparmor cni exclude_graphdriver_devicemapper selinux seccomp systemd" PREFIX=/usr && \
+    echo "changeme" | sudo -S make install PREFIX=/usr && \
+    git clean -d -x -f && \
+    podman --version && \
+    echo "changeme" | sudo -S rm -rf /tmp/* && \
+    rm -rf ~/go
+
+# configure tools required by podman
+RUN echo "changeme" | sudo -S chmod u-s /usr/bin/new[gu]idmap && \
+    echo "changeme" | sudo -S setcap cap_setuid+eip /usr/bin/newuidmap && \
+    echo "changeme" | sudo -S setcap cap_setgid+eip /usr/bin/newgidmap
+
+COPY --chown=root:root containers.conf registries.conf policy.json /etc/containers/
+
+# enable the podman socket service so that other tools can use its docker-compatible API
+RUN systemctl enable --user podman.socket && \
+    systemctl enable --user podman.service
+
+# build dive from source (using a fork that fixes the scrolling bug), see
+# also here: https://github.com/wagoodman/dive/pull/520
+RUN cd ~/src && \
+    git clone https://github.com/pov1ba/dive.git -b fix/scrolling-contents && \
+    cd dive && \
+    export GOCACHE="$PWD/.gocache" && \
+    make bootstrap && \
+    echo "release: { prerelease: auto, draft: false }" > .goreleaser.yaml && \
+    echo "builds: [{ binary: dive, env: [CGO_ENABLED=0], goos: [linux], goarch: [amd64], ldflags: '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.buildTime={{.Date}}' }]" >> .goreleaser.yaml && \
+    make build && \
+    mv snapshot/dive_linux_amd64_v1/dive ~/.local/bin/dive && \
+    git clean -d -x -f && \
+    ~/.local/bin/dive --version && \
+    echo "changeme" | sudo -S rm -rf /tmp/* && \
+    echo "changeme" | sudo -S rm -rf ~/go
 
 # install tools for rust development
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal && \
@@ -228,8 +333,8 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --pr
 # install tools for container development
 
 ## kubectl
-RUN mkdir -p ~/.local/bin && \
-    export KUBE_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt) && \
+RUN export KUBE_VERSION="v1.31.0" && \
+    mkdir -p ~/.local/bin && \
     curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/amd64/kubectl" && \
     curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/amd64/kubectl.sha256" && \
     echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check && rm kubectl.sha256 && \
@@ -237,11 +342,17 @@ RUN mkdir -p ~/.local/bin && \
     mv ./kubectl ~/.local/bin/kubectl
 
 ## helm
-RUN mkdir -p ~/.local/bin && \
-    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && \
-    chmod 700 get_helm.sh && \
-    HELM_INSTALL_DIR=~/.local/bin PATH=$PATH:~/.local/bin ./get_helm.sh --no-sudo && \
-    rm -f get_helm.sh
+RUN export HELM_VERSION="v3.15.4" && \
+    mkdir -p ~/.local/bin && \
+    curl -LO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz" && \
+    curl -LO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz.sha256sum" && \
+    sha256sum --check helm*.sha256sum && rm helm*.sha256sum && \
+    mkdir helm && \
+    tar xzf helm*.tar.gz -C ./helm && \
+    mv ./helm/linux-amd64/helm ~/.local/bin/helm && \
+    rm helm*.tar.gz && \
+    rm -rf helm && \
+    ~/.local/bin/helm version
 
 ## kubetail
 RUN cd ~/.oh-my-zsh/custom/plugins/ && \
@@ -252,8 +363,9 @@ RUN cd ~/.oh-my-zsh/custom/plugins/ && \
     git clone https://github.com/ahmetb/kubectx.git kubectx
 
 ## kubelogin
-ARG KUBELOGIN_VERSION="v0.0.34"
-RUN mkdir -p ~/.local/bin && \
+RUN export KUBELOGIN_VERSION="v0.1.4" && \
+    export GOCACHE="/tmp/.gocache" && \
+    mkdir -p ~/.local/bin && \
     curl -LO "https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip" && \
     curl -LO "https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip.sha256" && \
     cat kubelogin-linux-amd64.zip.sha256 | sha256sum --check && \
@@ -263,55 +375,57 @@ RUN mkdir -p ~/.local/bin && \
     chmod +x kubelogin/bin/linux_amd64/kubelogin && \
     mv ./kubelogin/bin/linux_amd64/kubelogin ~/.local/bin/kubelogin && \
     rm -rf ./kubelogin && \
-    ~/.local/bin/kubelogin --version
+    ~/.local/bin/kubelogin --version && \
+    rm -rf $GOCACHE
 
 ## Cluster API
-ARG CLUSTER_API_VERSION="v1.5.3"
-RUN mkdir -p ~/.local/bin && \
+RUN export CLUSTER_API_VERSION="v1.8.1" && \
+    mkdir -p ~/.local/bin && \
     curl -Lo clusterctl "https://github.com/kubernetes-sigs/cluster-api/releases/download/${CLUSTER_API_VERSION}/clusterctl-linux-amd64" && \
     chmod +x clusterctl && \
     mv ./clusterctl ~/.local/bin/clusterctl && \
     ~/.local/bin/clusterctl version
 
 ## cilium
-RUN mkdir -p ~/.local/bin && \
-    export CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt) && \
+RUN export CILIUM_CLI_VERSION="v0.16.15" && \
     export CLI_ARCH=amd64 && \
-    curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum} && \
+    mkdir -p ~/.local/bin && \
+    curl -L --fail --remote-name-all "https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}" && \
     sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum && \
     tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz ~/.local/bin && \
     rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum} && \
     ~/.local/bin/cilium version --client
 
 ## hubble
-RUN mkdir -p ~/.local/bin && \
-    export HUBBLE_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt) && \
+RUN export HUBBLE_VERSION="v1.16.0" && \
     export HUBBLE_ARCH=amd64 && \
-    curl -L --fail --remote-name-all https://github.com/cilium/hubble/releases/download/$HUBBLE_VERSION/hubble-linux-${HUBBLE_ARCH}.tar.gz{,.sha256sum} && \
+    mkdir -p ~/.local/bin && \
+    curl -L --fail --remote-name-all "https://github.com/cilium/hubble/releases/download/$HUBBLE_VERSION/hubble-linux-${HUBBLE_ARCH}.tar.gz{,.sha256sum}" && \
     sha256sum --check hubble-linux-${HUBBLE_ARCH}.tar.gz.sha256sum && \
     tar xzvfC hubble-linux-${HUBBLE_ARCH}.tar.gz ~/.local/bin && \
     rm hubble-linux-${HUBBLE_ARCH}.tar.gz{,.sha256sum} && \
     ~/.local/bin/hubble --version
 
 ## kind
-ARG KIND_VERSION="v0.20.0"
-RUN mkdir -p ~/.local/bin && \
-    curl -Lo ./kind https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64 && \
+RUN export KIND_VERSION="v0.24.0" && \
+    mkdir -p ~/.local/bin && \
+    curl -Lo ./kind "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64" && \
     chmod +x ./kind && \
     mv ./kind ~/.local/bin/kind && \
     ~/.local/bin/kind --version
 
 ## kubebuilder
-RUN mkdir -p ~/.local/bin && \
-    curl -L -o kubebuilder https://go.kubebuilder.io/dl/latest/$(~/.local/bin/golang/bin/go env GOOS)/$(~/.local/bin/golang/bin/go env GOARCH) && \
+RUN export KUBEBUILDER_VERSION="v4.1.1" && \
+    mkdir -p ~/.local/bin && \
+    curl -L -o kubebuilder "https://github.com/kubernetes-sigs/kubebuilder/releases/download/${KUBEBUILDER_VERSION}/kubebuilder_linux_amd64" && \
     chmod +x ./kubebuilder && \
     mv ./kubebuilder ~/.local/bin/kubebuilder && \
     ~/.local/bin/kubebuilder version
 
 ## vault
-ARG VAULT_VERSION=1.15.4
-RUN mkdir -p ~/.local/bin && \
-    curl -L -o vault.zip https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip && \
+RUN export VAULT_VERSION="1.17.3" && \
+    mkdir -p ~/.local/bin && \
+    curl -L -o vault.zip "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip" && \
     unzip vault.zip -d ./vault && \
     rm vault.zip && \
     chmod +x vault/vault && \
@@ -320,9 +434,9 @@ RUN mkdir -p ~/.local/bin && \
     ~/.local/bin/vault --version
 
 ## kubeseal
-ARG KUBESEAL_VERSION=0.24.4
-RUN mkdir -p ~/.local/bin && \
-    curl -L -o kubeseal.tar.gz https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz && \
+RUN export KUBESEAL_VERSION="0.27.1" && \
+    mkdir -p ~/.local/bin && \
+    curl -L -o kubeseal.tar.gz "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz" && \
     tar -xvzf kubeseal.tar.gz kubeseal && \
     rm kubeseal.tar.gz && \
     chmod +x kubeseal && \
@@ -330,33 +444,32 @@ RUN mkdir -p ~/.local/bin && \
     ~/.local/bin/kubeseal --version
 
 ## lazydocker
-ARG LAZYDOCKER_VERSION=0.23.1
-RUN mkdir -p ~/.local/bin && \
-    curl -L -o lazydocker.tar.gz https://github.com/jesseduffield/lazydocker/releases/download/v${LAZYDOCKER_VERSION}/lazydocker_${LAZYDOCKER_VERSION}_Linux_x86_64.tar.gz && \
+RUN export LAZYDOCKER_VERSION="0.23.3" && \
+    mkdir -p ~/.local/bin && \
+    curl -L -o lazydocker.tar.gz "https://github.com/jesseduffield/lazydocker/releases/download/v${LAZYDOCKER_VERSION}/lazydocker_${LAZYDOCKER_VERSION}_Linux_x86_64.tar.gz" && \
     tar -xvzf lazydocker.tar.gz lazydocker && \
     rm lazydocker.tar.gz && \
     chmod +x lazydocker && \
     mv ./lazydocker ~/.local/bin/lazydocker && \
     ~/.local/bin/lazydocker --version
 
+## minio CLI
 RUN mkdir -p ~/.local/bin && \
     curl -LO https://dl.min.io/client/mc/release/linux-amd64/mc && \
     chmod +x mc && \
     mv mc ~/.local/bin/ && \
     ~/.local/bin/mc --version
 
-# docker mounts the /etc/resolv.conf, and we cannot overwrite it for the export; therefore
-# we copy the file to a temporary location and then move it during the WSL import
-COPY --chown=root:root resolv.conf /etc/resolv.conf.overwrite
-
 COPY --chown=dev:dev \
     .zshrc \
     .p10k.zsh \
-    .gitconfig \
-    .zsh_completion_just \
-    .zsh_completion_kubectx \
-    .zsh_completion_kubetail \
     /home/dev/
+
+COPY --chown=dev:dev .config/ /home/dev/.config/
+COPY --chown=dev:dev .completions/ /home/dev/.completions/
+
+## azure CLI completions
+RUN curl -L -o ~/.completions/.zsh_completion_az https://raw.githubusercontent.com/Azure/azure-cli/dev/az.completion
 
 # This image comes with a pre-configured powerlevel10k theme. You need to ensure that you have the NerdFont MesloLGF
 # installed in your terminals for icons to be rendered correctly. If you want to configure your own options, just

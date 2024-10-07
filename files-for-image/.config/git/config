@@ -1,0 +1,8 @@
+[credential]
+helper = git-credential-manager.exe # needs to be adjusted with correct path
+
+[http]
+cookiefile = /home/dev/.gitcookies
+
+[init]
+defaultBranch = main

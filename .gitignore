@@ -1,4 +1,2 @@
-/.gitconfig
-/passwd
-/resolv.conf
-/wsl.conf.copy
+/.build
+/files-for-image/wsl.conf.copy

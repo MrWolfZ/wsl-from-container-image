@@ -118,7 +118,12 @@ export NVM_DIR="$HOME/.nvm"
 # environment variables
 export GOBIN="$HOME/.local/bin/golang/bin"
 export CARGO_BIN="$HOME/.cargo/bin"
-export PATH="$PATH:$HOME/.local/bin:$GOBIN:$CARGO_BIN"
+LOCAL_BIN="$HOME/.local/bin"
+DOTNET_TOOLS="$HOME/.dotnet/tools"
+export PATH="$LOCAL_BIN:$GOBIN:$CARGO_BIN:$PATH:$DOTNET_TOOLS"
+
+# define a pager for unpaged git log
+export PAGER="less -F"
 
 # deduplicate any entries in $PATH
 typeset -U path
@@ -129,27 +134,32 @@ export MSBUILDSINGLELOADCONTEXT='1'
 export DOCKER_SCAN_SUGGEST='false'
 export DOCKER_CLI_HINTS='false'
 
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+
 export USE_GKE_GCLOUD_AUTH_PLUGIN='True'
 
 export ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE='50' # only show suggestions when the command is less than 50 characters long
 export ZSH_AUTOSUGGEST_MANUAL_REBIND='false' # can be set to true for better performance, but has caused random error messages for me
 export ZSH_AUTOSUGGEST_HISTORY_IGNORE="?(#c200,)" # ignore history entries that are longer than 200 characters
 
+export HOST_IP="$(ip route show | grep -i default | awk '{ print $3 }')"
+
 # completion scripts
-[ ! -f "$HOME/.zsh_completion_kubectl" ] && kubectl completion zsh > "$HOME/.zsh_completion_kubectl"
-source "$HOME/.zsh_completion_kubectl"
+[ ! -f "$HOME/.completions/.zsh_completion_kubectl" ] && kubectl completion zsh > "$HOME/.completions/.zsh_completion_kubectl"
+source "$HOME/.completions/.zsh_completion_kubectl"
 
-source "$HOME/.zsh_completion_kubectx"
-source "$HOME/.zsh_completion_kubetail"
-
-source "$HOME/.zsh_completion_just"
+source "$HOME/.completions/.zsh_completion_az"
+source "$HOME/.completions/.zsh_completion_just"
+source "$HOME/.completions/.zsh_completion_kubectx"
+source "$HOME/.completions/.zsh_completion_kubetail"
+source "$HOME/.completions/.zsh_completion_podman"
 
 # aliases
 alias k='kubectl'
-alias ls='ls -alh --color=auto'
+alias p='podman'
+alias ll='ls -alh --color=auto'
 alias kubectx=$ZSH/custom/plugins/kubectx/kubectx
 alias kubens=$ZSH/custom/plugins/kubectx/kubens
-alias docker-compose="TMPDIR=${HOME}/tmp docker-compose"
 alias python=python3
 alias code=/mnt/c/tools/VSCode/bin/code
 alias lazypodman='DOCKER_HOST=unix:///run/user/1000/podman/podman.sock lazydocker'
