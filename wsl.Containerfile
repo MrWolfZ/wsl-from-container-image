@@ -431,7 +431,7 @@ RUN export HUBBLE_VERSION="v1.16.0" && \
     ~/.local/bin/hubble --version
 
 ## kind
-RUN export KIND_VERSION="v0.24.0" && \
+RUN export KIND_VERSION="v0.25.0" && \
     mkdir -p ~/.local/bin && \
     curl -Lo ./kind "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64" && \
     chmod +x ./kind && \
