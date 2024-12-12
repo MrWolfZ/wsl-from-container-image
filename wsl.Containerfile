@@ -69,6 +69,7 @@ RUN apt-get update && \
     automake \
     btrfs-progs \
     build-essential \
+    containernetworking-plugins \
     gcc \
     git \
     go-md2man \
@@ -93,6 +94,7 @@ RUN apt-get update && \
     passt \
     pkg-config \
     pkgconf \
+    protobuf-compiler \
     python3 \
     runc \
     slirp4netns \
@@ -279,14 +281,36 @@ RUN export CONMON_VERSION="v2.1.12" && \
     echo "changeme" | sudo -S rm -rf /tmp/* && \
     rm -rf ~/go
 
+# we build netavark from source since the ubuntu repositories are often lagging behind
+RUN export NETAVARK_VERSION="v1.13.1" && \
+    cd ~/src && \
+    git clone https://github.com/containers/netavark -b $NETAVARK_VERSION --depth 1 && \
+    cd netavark && \
+    make && \
+    make docs && \
+    echo "changeme" | sudo -S make install && \
+    git clean -d -x -f && \
+    echo "changeme" | sudo -S rm -rf /tmp/*
+
+# we build aardvark-dns from source since the ubuntu repositories are often lagging behind
+RUN export AARDVARK_DNS_VERSION="v1.13.1" && \
+    cd ~/src && \
+    git clone https://github.com/containers/aardvark-dns -b $AARDVARK_DNS_VERSION --depth 1 && \
+    cd aardvark-dns && \
+    make && \
+    echo "changeme" | sudo -S make install && \
+    git clean -d -x -f && \
+    echo "changeme" | sudo -S rm -rf /tmp/*
+
 # we build podman from source since the ubuntu repositories are often lagging behind
 RUN export PODMAN_VERSION="v5.2.1" && \
     cd ~/src && \
     git clone https://github.com/containers/podman -b $PODMAN_VERSION --depth 1 && \
     cd podman && \
     export GOCACHE="$PWD/.gocache" && \
-    make BUILDTAGS="apparmor cni exclude_graphdriver_devicemapper selinux seccomp systemd" PREFIX=/usr && \
-    echo "changeme" | sudo -S make install PREFIX=/usr && \
+    make BUILDTAGS="apparmor cni exclude_graphdriver_devicemapper selinux seccomp systemd" && \
+    make rootlessport && \
+    echo "changeme" | sudo -S make install && \
     git clean -d -x -f && \
     podman --version && \
     echo "changeme" | sudo -S rm -rf /tmp/* && \
