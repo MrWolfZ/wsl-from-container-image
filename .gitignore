@@ -1,2 +1,4 @@
 /.build
 /files-for-image/wsl.conf.copy
+/*.gz
+/*.swp
