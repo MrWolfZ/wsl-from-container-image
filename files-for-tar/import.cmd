@@ -18,6 +18,9 @@ powershell -C "(Get-DnsClientServerAddress | Select-Object -ExpandProperty Serve
 call :CHECK_FAIL
 wsl -d @@ name @ -u root bash -c "mv -f resolv.conf /etc/resolv.conf && sed -i 's/\r//' /etc/resolv.conf && chown root:root /etc/resolv.conf" > nul 2>&1
 call :CHECK_FAIL
+echo Configuring /etc/sysctl.conf
+wsl -d @@ name @ -u root bash -c "echo 'fs.inotify.max_user_instances=8192' >> /etc/sysctl.conf && echo 'fs.inotify.max_user_watches=524288' >> /etc/sysctl.conf && sysctl -p" > nul 2>&1
+call :CHECK_FAIL
 echo Configuring .gitconfig
 wsl -d @@ name @ bash -c "if [ -f .gitconfig ]; then cp -f .gitconfig ~/.config/git/config; sed -i 's/\r//' ~/.config/git/config; fi" > nul 2>&1
 call :CHECK_FAIL
