@@ -21,9 +21,6 @@ call :CHECK_FAIL
 echo Configuring /etc/sysctl.conf
 wsl -d @@ name @ -u root bash -c "echo 'fs.inotify.max_user_instances=8192' >> /etc/sysctl.conf && echo 'fs.inotify.max_user_watches=524288' >> /etc/sysctl.conf && sysctl -p" > nul 2>&1
 call :CHECK_FAIL
-echo Configuring .gitconfig
-wsl -d @@ name @ bash -c "if [ -f .gitconfig ]; then cp -f .gitconfig ~/.config/git/config; sed -i 's/\r//' ~/.config/git/config; fi" > nul 2>&1
-call :CHECK_FAIL
 echo Fixing WSL interop...
 wsl -d @@ name @ -u root /bin/bash -c "echo :WSLInterop:M::MZ::/init:PF > /usr/lib/binfmt.d/WSLInterop.conf" > nul 2>&1
 wsl -d @@ name @ -u root systemctl restart systemd-binfmt > nul 2>&1
