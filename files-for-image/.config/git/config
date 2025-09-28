@@ -1,8 +1,32 @@
-[credential]
-helper = git-credential-manager.exe # needs to be adjusted with correct path
+[alias]
+jedi = push --force
 
-[http]
-cookiefile = /home/dev/.gitcookies
+[core]
+abbrev = 8
+autocrlf = false
+safecrlf = false
+editor = code --wait
+longpaths = true
+symlinks = true
+
+[credential]
+helper = /mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager.exe
+
+[user]
+name = ChangeMe
+email = change@me
 
 [init]
 defaultBranch = main
+
+[pull]
+rebase = true
+
+[push]
+autoSetupRemote = true
+
+[rerere]
+enabled = true
+
+[http]
+cookiefile = /home/dev/.gitcookies
