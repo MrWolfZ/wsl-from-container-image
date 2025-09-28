@@ -1,0 +1,29 @@
+{
+  "cSpell.words": [
+    "BUILDTAGS",
+    "deadsnakes",
+    "debconf",
+    "devicemapper",
+    "gnueabihf",
+    "graphdriver",
+    "libassuan",
+    "libbtrfs",
+    "libc",
+    "libcap",
+    "libdevmapper",
+    "libexec",
+    "libglib",
+    "libgpg",
+    "libgpgme",
+    "libprotobuf",
+    "libseccomp",
+    "libsystemd",
+    "libyajl",
+    "netavark",
+    "noninteractive",
+    "passt",
+    "rootlessport",
+    "seccomp",
+    "slirp"
+  ]
+}

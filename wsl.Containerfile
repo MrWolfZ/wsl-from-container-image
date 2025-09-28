@@ -62,7 +62,7 @@ RUN apt-get update && \
 RUN systemctl enable ssh && \
     sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
 
-# install tools for C development (useful for bulding other projects from source)
+# install tools for C development (useful for building other projects from source)
 RUN apt-get update && \
     apt-get install -y \
     autoconf \
