@@ -485,9 +485,7 @@ RUN mkdir -p ~/.local/bin && \
     ~/.local/bin/mc --version
 
 COPY --chown=dev:dev \
-    .zprofile \
     .zshrc \
-    .p10k.zsh \
     /home/dev/
 
 COPY --chown=dev:dev .config/ /home/dev/.config/
