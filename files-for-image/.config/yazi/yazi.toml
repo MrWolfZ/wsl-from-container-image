@@ -1,0 +1,111 @@
+# Yazi Configuration File
+# This file contains settings with defaults shown as comments
+# Uncomment and modify any setting to override the default
+
+[mgr]
+# Layout ratios for parent:current:preview panels
+# ratio = [1, 4, 3]
+
+# Sorting options
+# sort_by = "alphabetical"  # Options: "none", "mtime", "extension", "alphabetical", "natural", "size"
+# sort_sensitive = false    # Case-sensitive sorting
+# sort_reverse = false      # Reverse sort order
+# sort_dir_first = true     # Show directories first
+# sort_translit = false     # Transliterate filenames for sorting
+
+# Display options
+# linemode = "none"         # Options: "none", "size", "mtime", "permissions"
+show_hidden = false # Show hidden files (can toggle with '.')
+# show_symlink = true       # Show symlink targets
+
+# Scrolling behavior
+# scrolloff = 5             # Lines to keep above/below cursor
+
+# Mouse support
+# mouse_events = ["click", "scroll"]
+
+# Terminal title format
+# title_format = "Yazi: {cwd}"
+
+[preview]
+# Text preview options
+# wrap = "no"              # Wrap long lines: "yes" or "no"
+tab_size = 2 # Tab character width
+
+# Image preview dimensions
+# max_width = 600
+# max_height = 900
+
+# Image preview cache
+# cache_dir = ""           # Empty uses system cache dir
+
+# Image preview timing
+# image_delay = 30         # Delay in ms before showing image preview
+
+# Image quality settings
+# image_filter = "triangle"  # Downscaling filter: "nearest", "triangle", "catmull-rom", "lanczos3"
+# image_quality = 75         # JPEG quality for pre-caching (1-100)
+
+# Ueberzug-specific settings (for terminal image protocol)
+# ueberzug_scale = 1
+# ueberzug_offset = [0, 0, 0, 0]
+
+[opener]
+# Default applications for file operations
+# edit = [
+# 	{ run = '$EDITOR "$@"', desc = "Edit with default editor", block = true },
+# ]
+
+# View files with bat
+# view = [
+#	{ run = 'bat "$@"', desc = "View with bat", block = true },
+# ]
+
+[open]
+# Rules for opening specific file types
+# Inherits from system defaults unless overridden here
+# rules = []
+
+[tasks]
+# Task management settings
+# micro_workers = 10       # Number of workers for micro tasks
+# macro_workers = 25       # Number of workers for macro tasks
+# bizarre_retry = 5        # Number of retries for bizarre tasks
+# image_alloc = 536870912  # Memory allocation for image decoding (512MB)
+# image_bound = [0, 0]     # Max image dimensions (0 = no limit)
+
+[plugin]
+# File type detection
+# fetchers = []
+
+# Custom previewers (use this to add bat for text files)
+prepend_previewers = [
+  # Use bat for text files with syntax highlighting
+  { mime = "text/*", run = "bat" },
+  { mime = "*/xml", run = "bat" },
+  { mime = "*/javascript", run = "bat" },
+  { mime = "*/x-wine-extension-ini", run = "bat" },
+  { mime = "application/json", run = "bat" },
+]
+
+# Preloaders (load file info in advance)
+# preloaders = []
+
+[input]
+# Input field behavior
+# cursor_blink = false
+
+[confirm]
+# Confirmation dialog settings
+# None by default
+
+[pick]
+# File picker border style
+# border = "rounded"  # Options: "rounded", "sharp", "double"
+
+[which]
+# Key hint sorting
+# sort_by = "none"       # Options: "none", "alphabetical"
+# sort_sensitive = false
+# sort_reverse = false
+# sort_translit = false

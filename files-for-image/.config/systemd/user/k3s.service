@@ -1,0 +1,31 @@
+[Unit]
+Description=Lightweight Kubernetes (k3s) - Rootless
+Documentation=https://k3s.io
+After=network-online.target
+
+[Service]
+Type=notify
+# WorkingDirectory must be writable by the rootless user
+WorkingDirectory=%h
+# Run rootless mode with persistent state in home directory
+# Disable servicelb (load balancer) as it's typically not needed in WSL development
+# Traefik ingress controller is enabled by default for testing ingress resources
+ExecStart=%h/.local/bin/k3s server \
+    --rootless \
+    --data-dir=%h/.local/share/k3s \
+    --disable=servicelb \
+    --write-kubeconfig-mode=644
+KillMode=mixed
+Delegate=yes
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
+LimitNOFILE=1048576
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+TimeoutStartSec=0
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target

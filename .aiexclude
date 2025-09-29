@@ -1,0 +1,9 @@
+/.bin
+/.claude
+/.config
+/.tools
+/.vscode
+
+# some files are confusing the agent, and are not critical to its understanding, so we ignore them
+
+/wsl.Containerfile

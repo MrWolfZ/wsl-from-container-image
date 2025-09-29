@@ -25,5 +25,8 @@
     "rootlessport",
     "seccomp",
     "slirp"
-  ]
+  ],
+  "files.associations": {
+    "*.aiexclude": "ignore"
+  }
 }

@@ -1,4 +1,9 @@
-/.build
-/files-for-image/wsl.conf.copy
+/.build-*
+/files-for-image-*
 /*.gz
 /*.swp
+/*.sha256
+/*.log
+/.image-build
+/.claude/.claude.json
+/.claude/settings.local.json

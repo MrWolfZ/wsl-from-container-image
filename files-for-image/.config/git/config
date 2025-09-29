@@ -1,12 +1,9 @@
-[alias]
-jedi = push --force
-
 [core]
 abbrev = 8
 autocrlf = false
 safecrlf = false
-editor = code --wait
 longpaths = true
+pager = delta
 symlinks = true
 
 [credential]
@@ -19,6 +16,9 @@ email = change@me
 [init]
 defaultBranch = main
 
+[interactive]
+diffFilter = delta --color-only
+
 [pull]
 rebase = true
 
@@ -30,3 +30,12 @@ enabled = true
 
 [http]
 cookiefile = /home/dev/.gitcookies
+
+[delta]
+navigate = true       # use n and N to move between diff sections
+dark = true
+line-numbers = true
+side-by-side = true
+
+[merge]
+conflictStyle = zdiff3

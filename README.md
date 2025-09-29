@@ -10,8 +10,7 @@
 
 ## Building the distro
 
-- adjust `.gitconfig` as desired
-- run `just build run` to build the image and run it as a container for testing
-- run `just export` to export the image's file system to `C:\wsl`
-- run the `C:\wsl\*-import.cmd` script to create the WSL distro
-  - you will be prompted for the sudo password in order to fix the `resolv.conf`
+- run `just build-image <variant>` to build the image
+- run `just run <variant>` to run the image as a container for testing
+- run `just export <variant>` to export the image's file system
+- run the `<distro>-import.cmd` script to create the WSL distro

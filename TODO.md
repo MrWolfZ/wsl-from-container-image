@@ -1,9 +1,16 @@
 # TODO
 
+- create function claude-init which initializes the claude cli with a default setup
+- clean up builds
+  - move neovim to shell-tools layer (where nano and micro are)
+  - create build-tools layer
+  - create podman variant
+  - make the ai and dev variants derive from the podman variant
+
+- (optional) add podman-tui
 - pull tool installations and updates into a dedicated script that can be repeated after import to update tools
-- use podman instead of docker to build the image
-- split binary downloads into individual stages so that a base stage can be changed without having to re-download everything else
-- update readme
-  - mention that .wslconfig can be adjusted as required prior to import
-  - mention how to configure WSL to run containers at boot
-  - mention how to connect to podman inside WSL
+- play around with different fonts
+- align terminal nav shortcuts (both in vscode as well as windows terminal)
+  - ctrl+shift+pgup/pgdown for scroll page
+  - ctrl+shift+up/down for scroll line
+  - alt+up/down for scrolling to commands

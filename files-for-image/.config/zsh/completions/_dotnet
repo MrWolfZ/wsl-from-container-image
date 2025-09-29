@@ -1,0 +1,16 @@
+#compdef dotnet
+
+_dotnet() {
+  local -a completions
+  # Ask the dotnet CLI for completions for the current words
+  completions=("${(ps:\n:)$(dotnet complete -- "$words")}")
+
+  if (( ${#completions[@]} )); then
+    reply=("${completions[@]}")
+  else
+    # fallback to normal filename completion
+    _files
+  fi
+}
+
+compdef _dotnet dotnet

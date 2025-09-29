@@ -1,0 +1,88 @@
+# VSCode-like defaults for GNU nano (tailored for Ubuntu + dark theme)
+
+## Include Ubuntu's syntax files (adjust if your distro stores them elsewhere)
+include "/usr/share/nano/*.nanorc"
+# include "/usr/local/share/nano/*.nanorc"
+
+## Editor behavior — VSCode-like defaults
+set autoindent           # keep indentation when creating new lines
+set tabsize 2            # reduced VSCode default tab size (2 instead of 4)
+set tabstospaces         # insert spaces instead of tabs
+set softwrap             # soft wrap long lines visually
+set linenumbers          # show line numbers
+set constantshow         # show cursor position continuously in the status bar
+set mouse                # allow mouse clicks and selections
+set multibuffer          # allow multiple buffers (like tabs)
+set positionlog          # remember cursor position per file
+set smarthome            # smarter Home key
+
+## Title / status (dark-friendly)
+set titlecolor brightwhite,cyan
+set statuscolor brightwhite,black
+
+## Search/navigation
+set jumpyscrolling       # smoother paging/jumps
+
+## Clipboard / external helpers
+# Uncomment if your nano build supports it
+# set clipboard
+
+## VSCode-like keybindings (bind only functions that exist widely)
+# Format: bind <key> <function> <menu>
+# Use 'all' to apply in all menus where the function exists.
+
+# File operations
+bind ^S writeout all        # Ctrl+S = Save
+bind ^Q exit all            # Ctrl+Q = Quit
+
+# Find / Replace
+bind ^F whereis all         # Ctrl+F = Find
+bind ^H replace all         # Ctrl+H = Replace
+bind ^G help all            # Ctrl+G = Help
+
+# Navigation
+bind M-G gotoline all       # Alt+G = Go to line
+bind M-; location all       # Alt+; = Show cursor position (location is supported widely)
+
+# Editing: undo/redo, cut/copy/paste
+# Nano 8's "modern" bindings map Ctrl+X/C/V/Z/Y to cut/copy/paste/undo/redo when enabled.
+# Here we bind the canonical function names that are widely supported.
+bind ^Z undo all            # Ctrl+Z = Undo
+bind ^Y redo all            # Ctrl+Y = Redo
+bind ^X cut all             # Ctrl+X = Cut (kill)
+bind ^C copy all            # Ctrl+C = Copy
+bind ^V paste all           # Ctrl+V = Paste
+bind ^L zap all             # Ctrl+L = Delete current line
+
+# Selection
+bind ^A mark all            # Ctrl+A = Select all (mark entire buffer)
+bind M-/ mark all           # Alt+/ = Toggle selection
+
+# Indent / unindent
+bind M-] indent all         # Alt+] = Indent selection or line
+bind M-[ unindent all       # Alt+[ = Unindent selection or line
+
+# Search again
+bind M-? findnext all       # Alt+? = Repeat search
+
+# Cancel selection for yes/no dialogs
+bind ^C cancel yesno
+
+## Colors & theme
+set fill 80                 # visual line length guide
+
+## Notes & troubleshooting (kept verbose for clarity)
+# - nano 8 introduced optional "modern bindings" that map Ctrl+X/C/V/Z/Y etc.
+# You can enable them by invoking nano with `--modernbindings` or by calling
+# nano through a symlink whose basename starts with "e" (e.g. `enano` or `e`).
+# See nano's release notes and the nanorc manpage for details.
+# - If nano fails to start because of an unknown option or bind, comment that line
+# and restart nano. Different distributions and builds expose slightly different
+# sets of options and function names — this file sticks to the features that are
+# broadly supported in the 8.x series on Ubuntu.
+# - To inspect what options your installed nano supports, run: `man nanorc` or `nano -V`.
+# - If you want a complete Solarized Dark / Monokai-like syntax included directly,
+# I can add it below (would be a sizeable block). Tell me which theme and I'll
+# append it.
+
+# End of configuration (compatible with nano 8.6 on Ubuntu)

@@ -1,0 +1,39 @@
+# must be at the top so that it runs before any compdef calls
+# https://github.com/mattmc3/ez-compinit
+mattmc3/ez-compinit
+
+# https://github.com/mafredri/zsh-async
+mafredri/zsh-async
+
+# https://github.com/romkatv/powerlevel10k
+romkatv/powerlevel10k
+
+# https://github.com/romkatv/zsh-bench
+romkatv/zsh-bench kind:path
+
+# https://github.com/zsh-users/zsh-autosuggestions
+zsh-users/zsh-autosuggestions kind:defer
+
+# https://github.com/olets/zsh-abbr
+olets/zsh-abbr kind:defer
+
+# https://github.com/olets/zsh-window-title
+olets/zsh-window-title kind:defer
+
+# https://github.com/Aloxaf/fzf-tab
+# must be loaded after compinit and before other completion plugins
+Aloxaf/fzf-tab
+
+# https://github.com/zsh-users/zsh-history-substring-search
+# must be loaded after the syntax highlighting plugins
+zsh-users/zsh-history-substring-search kind:defer
+
+# https://github.com/ajeetdsouza/zoxide
+ajeetdsouza/zoxide kind:defer
+
+## load syntax highlighting plugins last
+# https://github.com/zsh-users/zsh-syntax-highlighting
+# (disabled due to performance for now) zsh-users/zsh-syntax-highlighting kind:defer
+
+# https://github.com/olets/zdharma-continuum/fast-syntax-highlighting
+zdharma-continuum/fast-syntax-highlighting kind:defer

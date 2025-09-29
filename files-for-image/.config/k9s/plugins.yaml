@@ -1,0 +1,19 @@
+# k9s plugins configuration
+# Add custom plugins here following the format documented at:
+# https://k9scli.io/topics/plugins/
+#
+# Example:
+# plugins:
+#   my-plugin:
+#     shortCut: Ctrl-L
+#     description: Description of plugin
+#     scopes:
+#     - po
+#     command: kubectl
+#     background: false
+#     args:
+#     - logs
+#     - -f
+#     - $NAME
+
+plugins: {}
