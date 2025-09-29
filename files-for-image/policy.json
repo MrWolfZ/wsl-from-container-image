@@ -1,10 +1,47 @@
 {
   "default": [
     {
-      "type": "insecureAcceptAnything"
+      "type": "reject"
     }
   ],
   "transports": {
+    "docker": {
+      "docker.io": [
+        {
+          "type": "insecureAcceptAnything"
+        }
+      ],
+      "ghcr.io": [
+        {
+          "type": "insecureAcceptAnything"
+        }
+      ],
+      "quay.io": [
+        {
+          "type": "insecureAcceptAnything"
+        }
+      ],
+      "registry.k8s.io": [
+        {
+          "type": "insecureAcceptAnything"
+        }
+      ],
+      "gcr.io": [
+        {
+          "type": "insecureAcceptAnything"
+        }
+      ],
+      "registry.access.redhat.com": [
+        {
+          "type": "insecureAcceptAnything"
+        }
+      ],
+      "localhost:5000": [
+        {
+          "type": "insecureAcceptAnything"
+        }
+      ]
+    },
     "docker-daemon": {
       "": [
         {

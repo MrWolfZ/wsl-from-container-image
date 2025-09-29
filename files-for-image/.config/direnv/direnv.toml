@@ -1,0 +1,5 @@
+[global]
+strict_env = true
+log_filter = '^$'
+# log_format = "-"
+# the above does not work until this change is released as part of 3.7.2 or newer: https://github.com/direnv/direnv/pull/1476
