@@ -21,14 +21,15 @@ nca() {
     return 130
   fi
 
-  if [[ "$EDITOR" == "code" ]]; then
-    if [[ -f "$selection" ]]; then
+  if [[ -f "$selection" ]]; then
+    if [[ "$EDITOR" == "code" ]]; then
       code --reuse-window "$selection"
     else
-      code "$selection"
+      ${EDITOR:-nano} "$selection"
     fi
   else
-    ${EDITOR:-nano} "$selection"
+    code "$selection"
   fi
+
   return $?
 }
