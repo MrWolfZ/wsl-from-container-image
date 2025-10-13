@@ -21,7 +21,7 @@ call :CHECK_FAIL
 echo Run apt-get update...
 wsl -d @@ name @ -u root apt-get update > nul 2>&1
 echo Run apt-get upgrade...
-wsl -d @@ name @ -u root apt-get upgrade > nul 2>&1
+wsl -d @@ name @ -u root apt-get upgrade -y > nul 2>&1
 call :CHECK_FAIL
 echo Please configure a new password
 wsl -d @@ name @ -u root passwd dev
