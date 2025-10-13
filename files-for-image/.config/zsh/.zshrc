@@ -382,7 +382,7 @@ fi
     # create a common alias for 'ls', although with this setup it is preferable to always use the 't' aliases below
     alias ll='ls -alhov --color --group-directories-first'
 
-    EZA_COMMAND='eza --all --long --group-directories-first --header --icons=always --smart-group --time-style long-iso --git --no-time --tree --level'
+    EZA_COMMAND='eza --all --long --group-directories-first --header --icons=always --smart-group --time-style long-iso --no-time --tree --level'
     alias t="$EZA_COMMAND 1"
     alias t2="$EZA_COMMAND 2"
     alias t3="$EZA_COMMAND 3"

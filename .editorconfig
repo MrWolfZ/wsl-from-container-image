@@ -1,2 +1,5 @@
 [*Containerfile]
 indent_size = 4
+
+[.zshrc]
+ignore = true
