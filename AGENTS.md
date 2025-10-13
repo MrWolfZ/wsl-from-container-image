@@ -509,7 +509,8 @@ Three ZSH functions provide automatic sandboxing for package installation comman
 
 - Sandboxes: `pip`, `add`, `sync`, `lock`, `install`
 - Asks for confirmation before system installs (`--system`, `-s`)
-- Mounts project directory, `.venv`, and `pip.conf`/`.pypirc` files
+- Mounts project directory, `.venv`, `~/.cache/uv`, `~/.local/share/uv` (for Python interpreters), and `pip.conf`/`.pypirc` files
+- Sets HOME to actual home directory so venv symlinks work correctly
 - Uses official `ghcr.io/astral-sh/uv:latest` container image
 - Drops all capabilities, sets `no-new-privileges`, and runs with host UID/GID
 
@@ -524,7 +525,8 @@ Three ZSH functions provide automatic sandboxing for package installation comman
 **Security features:**
 
 - All run with `--cap-drop ALL` and `--security-opt no-new-privileges`
-- HOME set to `/tmp` to prevent writing to host home directory
+- Only specific directories mounted (project, venv, cache, config files) - restricts access to host filesystem
+- uv function sets HOME to actual home directory for venv symlink compatibility, but only mounts specific uv directories
 - Config files mounted read-only where appropriate
 - Falls back to host execution only after explicit user confirmation
 - Non-install commands bypass sandboxing for normal operations
