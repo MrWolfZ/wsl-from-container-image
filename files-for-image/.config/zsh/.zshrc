@@ -455,6 +455,9 @@ fi
     # k3s_stop - stop k3s rootless service
     source "$ZDOTDIR/functions/k3s_stop.zsh"
 
+    # direnv_list - list direnv-exported environment variables
+    source "$ZDOTDIR/functions/direnv_list.zsh"
+
   # zsh-abbr
     # general configurations: https://zsh-abbr.olets.dev/configuration-variables.html
     ABBR_USER_ABBREVIATIONS_FILE="$ZDOTDIR/.zsh_abbr.cfg"
