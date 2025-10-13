@@ -1,16 +1,7 @@
 # TODO
 
-- debug this error:
-
-    ```sh
-    ❯ nc wsl
-    Error: ./src/wsl/ is a directory and cannot be opened
-    ```
-
-- change abbr for ch and chs to not have trailing space
 - properly handle ctrl-backspace in micro settings for both windows terminal and vscode
 - fix k3s not working
-- update backup script to exclude even more directories like caches
 - create function claude-init which initializes the claude cli with a default setup
 - clean up builds
   - move neovim to shell-tools layer (where nano and micro are)
@@ -21,7 +12,6 @@
   - make sure that the systemd service has the above in the PATH
 - add ncdu tool for disk space usage analyses
 - add tool shfmt
-- format all shell scripts
 - update list of recommended extensions
 
 - (optional) add podman-tui
