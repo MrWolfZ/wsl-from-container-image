@@ -50,6 +50,7 @@ backup() {
 
     # IDE and editor
     --exclude='**/.idea'
+    --exclude='**/.vscode-test'
     --exclude='**/*.swp'
     --exclude='**/*.swo'
     --exclude='**/*~'
