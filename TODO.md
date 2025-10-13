@@ -10,8 +10,6 @@
   - make the ai and dev variants derive from the podman variant
 - put podman binaries into $HOME/.local/bin (including all systemd references)
   - make sure that the systemd service has the above in the PATH
-- add ncdu tool for disk space usage analyses
-- add tool shfmt
 - update list of recommended extensions
 
 - (optional) add podman-tui

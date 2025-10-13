@@ -174,6 +174,10 @@ superfile_version_arg := " --build-arg SUPERFILE_VERSION=" + superfile_version
 yazi_version := "v25.5.31"
 yazi_version_arg := " --build-arg YAZI_VERSION=" + yazi_version
 
+# https://github.com/mvdan/sh/tags
+shfmt_version := "v3.12.0"
+shfmt_version_arg := " --build-arg SHFMT_VERSION=" + shfmt_version
+
 # https://github.com/NVIDIA/libnvidia-container/tags
 nvidia_container_toolkit_version := "1.17.8-1"
 nvidia_container_toolkit_version_arg := " --build-arg NVIDIA_CONTAINER_TOOLKIT_VERSION=" + nvidia_container_toolkit_version
@@ -239,6 +243,7 @@ shell_tools_build_args := (
   + micro_version_arg
   + superfile_version_arg
   + yazi_version_arg
+  + shfmt_version_arg
 )
 
 dev:

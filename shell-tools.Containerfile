@@ -201,6 +201,13 @@ RUN curl -fLO "https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/
     mv yazi-x86_64-unknown-linux-musl/completions/_ya "$HOME/.config/zsh/completions/" && \
     rm -rf yazi-x86_64-unknown-linux-musl
 
+FROM base-with-dev-user as base-shfmt
+
+ARG SHFMT_VERSION
+RUN curl -fLO "https://github.com/mvdan/sh/releases/download/${SHFMT_VERSION}/shfmt_${SHFMT_VERSION}_linux_amd64" && \
+    mv shfmt_${SHFMT_VERSION}_linux_amd64 "$HOME/.local/bin/shfmt" && \
+    chmod +x "$HOME/.local/bin/shfmt"
+
 FROM ${VARIANT_BASE_IMAGE}
 
 # we make some directories owned by root for security
@@ -275,3 +282,6 @@ COPY --from=base-yazi --chown=root:root /home/dev/.local/bin/ya /home/dev/.local
 COPY --from=base-yazi --chown=root:root /home/dev/.config/zsh/completions/_yazi /home/dev/.config/zsh/completions/
 COPY --from=base-yazi --chown=root:root /home/dev/.config/zsh/completions/_ya /home/dev/.config/zsh/completions/
 RUN PATH="$HOME/.local/bin:$PATH" yazi --version
+
+COPY --from=base-shfmt --chown=root:root /home/dev/.local/bin/shfmt /home/dev/.local/bin/
+RUN PATH="$HOME/.local/bin:$PATH" shfmt --version

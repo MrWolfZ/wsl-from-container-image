@@ -73,6 +73,7 @@ RUN apt-get update && \
     gnupg \
     htop \
     lsb-release \
+    ncdu \
     pv \
     tree \
     uidmap \
