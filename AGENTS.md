@@ -169,6 +169,7 @@ The shell includes a set of powerful search functions that combine modern CLI to
 - Content search uses ripgrep's regex syntax; filename search uses fd's pattern matching
 - Auto-selects single results without opening fzf when a pattern is provided (performance optimization)
 - `*c` functions intelligently detect VS Code Server availability and fall back to `$EDITOR` if not present
+- `nc` and `nca` functions reuse the current VS Code window only for files; directories open in a new window
 - Functions with `a` suffix search hidden files/directories
 - Preview window shows file contents using bat with syntax highlighting (content search)
 - Preview window intelligently uses eza for directories and bat for files (filename search)
@@ -221,6 +222,32 @@ typeset -g POWERLEVEL9K_GIT_COMMIT_AGE_FOREGROUND=213      # magenta (default)
 - Segment definitions: `p10k_segments/git_commit.zsh`
 - Loaded in: `.zshrc` lines 109
 - Documentation: `.p10k.zsh` lines 512-528
+
+### Shell Utility Functions
+
+**direnv_list** - List direnv-exported environment variables
+
+Displays environment variables currently exported by direnv in the active directory.
+
+**Usage:**
+
+```bash
+direnv_list       # Show variable names only
+direnv_list -v    # Show variable names and values
+```
+
+**Features:**
+
+- Checks if direnv is active in the current directory
+- Uses `direnv export json` for accurate state detection
+- Filters out `DIRENV_*` internal variables
+- Sorted alphabetical output
+- **PATH diff**: When showing values, `PATH` is displayed as a diff against the default user PATH:
+  - `PATH+=<entry>` - Entries added by direnv
+  - `PATH-=<entry>` - Entries removed by direnv
+- Requires jq for JSON parsing
+
+**Implementation:** `functions/direnv_list.zsh`
 
 ### Podman Configuration (`files-for-image/containers.conf`)
 

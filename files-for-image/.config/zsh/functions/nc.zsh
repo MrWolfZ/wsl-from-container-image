@@ -22,7 +22,11 @@ nc() {
   fi
 
   if [[ "$EDITOR" == "code" ]]; then
-    code --reuse-window "$selection"
+    if [[ -f "$selection" ]]; then
+      code --reuse-window "$selection"
+    else
+      code "$selection"
+    fi
   else
     ${EDITOR:-nano} "$selection"
   fi
