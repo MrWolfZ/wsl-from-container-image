@@ -513,6 +513,7 @@ RUN echo "changeme" | sudo -S chown -R root:root "$HOME/.cargo/bin" && \
 
 COPY --from=base-python --chown=root:root /home/dev/.local/bin/* /home/dev/.local/bin/
 COPY --from=base-python --chown=dev:dev /home/dev/.local/share/* /home/dev/.local/share/
+COPY --from=base-python --chown=dev:dev /home/dev/.cache/uv /home/dev/.cache/uv
 COPY --from=base-python --chown=root:root /home/dev/.config/zsh/completions/* /home/dev/.config/zsh/completions/
 RUN export PATH="$HOME/.local/bin:$PATH" && uv --version && python --version
 
