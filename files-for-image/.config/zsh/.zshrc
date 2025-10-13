@@ -471,8 +471,11 @@ fi
     ABBR_SET_EXPANSION_CURSOR=1
     ABBR_SET_LINE_CURSOR=0
 
-    # enable syntax highlighting
+    # enable syntax highlighting with zsh-abbr
     zsh-defer source "$ZDOTDIR/.zsh_abbr_syntax_highlighting.zsh"
+
+    # fix ghost text issue with with zsh-abbr and zsh-autosuggestions
+    zsh-defer source "$ZDOTDIR/.zsh_abbr_autosuggestions.zsh"
 
     # podman
     alias pl="DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock lazydocker"
