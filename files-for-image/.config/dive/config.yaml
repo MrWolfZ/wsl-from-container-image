@@ -38,7 +38,6 @@ diff:
     # - removed
     # - modified
     - unmodified
-
 # filetree:
 #   # The default directory-collapse state
 #   collapse-dir: false

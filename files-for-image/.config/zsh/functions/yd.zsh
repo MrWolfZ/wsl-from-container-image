@@ -6,7 +6,7 @@ function yd() {
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
   yazi "$@" --cwd-file="$tmp"
   if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-      z -- "$cwd"
+    z -- "$cwd"
   fi
   rm -f -- "$tmp"
 }

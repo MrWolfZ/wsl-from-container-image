@@ -10,6 +10,6 @@ function sd() {
     # replace `cd` with zoxide navigation
     sed -i 's/^cd/z/' "$SPF_LAST_DIR"
     . "$SPF_LAST_DIR"
-    rm -f -- "$SPF_LAST_DIR" > /dev/null
+    rm -f -- "$SPF_LAST_DIR" >/dev/null
   }
 }

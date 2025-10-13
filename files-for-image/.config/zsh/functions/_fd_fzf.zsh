@@ -16,9 +16,9 @@ _fd_fzf() {
 
   while getopts "ac:" opt; do
     case "$opt" in
-      a) include_hidden=true ;;
-      c) command_name=$OPTARG ;;
-      *) ;;
+    a) include_hidden=true ;;
+    c) command_name=$OPTARG ;;
+    *) ;;
     esac
   done
   shift $((OPTIND - 1))
@@ -30,7 +30,7 @@ _fd_fzf() {
   local search_dir="${2:-.}"
 
   local hidden_opt=""
-  if $include_hidden ; then
+  if $include_hidden; then
     hidden_opt="--hidden"
   fi
 
@@ -38,8 +38,8 @@ _fd_fzf() {
   if [ -z "$pattern" ]; then
     # No pattern: run fd for all files and let fzf handle filtering
     local selection
-    selection="$(fd $hidden_opt --color=always . "$search_dir" \
-      | fzf --reverse --ansi --preview 'if [ -d {} ]; then eza --color=always --icons=always --group-directories-first --long --all --git {}; else bat --color=always --style=numbers,changes --line-range :500 {}; fi')"
+    selection="$(fd $hidden_opt --color=always . "$search_dir" |
+      fzf --reverse --ansi --preview 'if [ -d {} ]; then eza --color=always --icons=always --group-directories-first --long --all --git {}; else bat --color=always --style=numbers,changes --line-range :500 {}; fi')"
 
     local ret=$?
 
@@ -74,8 +74,8 @@ _fd_fzf() {
 
   # Multiple results: run through fzf with preview
   local selection
-  selection="$(fd $hidden_opt --color=always . "$search_dir" \
-    | fzf --reverse --ansi --query="$pattern" --preview 'if [ -d {} ]; then eza --color=always --icons=always --group-directories-first --long --all --git {}; else bat --color=always --style=numbers,changes --line-range :500 {}; fi')"
+  selection="$(fd $hidden_opt --color=always . "$search_dir" |
+    fzf --reverse --ansi --query="$pattern" --preview 'if [ -d {} ]; then eza --color=always --icons=always --group-directories-first --long --all --git {}; else bat --color=always --style=numbers,changes --line-range :500 {}; fi')"
 
   local ret=$?
 
