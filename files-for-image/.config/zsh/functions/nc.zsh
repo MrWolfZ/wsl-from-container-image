@@ -1,14 +1,14 @@
-nea() {
-  # nea - fuzzy-find with fd + fzf (filename search, including hidden files) and open in $EDITOR
+nc() {
+  # nc - fuzzy-find with fd + fzf (filename search) and open in $EDITOR
   # Usage:
-  #   nea [pattern] [directory]
+  #   nc [pattern] [directory]
   # Arguments:
   #   pattern     optional search pattern (if empty, shows all files)
   #   directory   optional directory to search in (defaults to current directory)
 
   setopt local_options pipefail
 
-  _fd_fzf -a -c nea "$@"
+  _fd_fzf -c nc "$@"
   local ret=$?
   if [ "$ret" -ne 0 ]; then
     return $ret

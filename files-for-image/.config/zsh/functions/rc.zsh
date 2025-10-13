@@ -1,14 +1,14 @@
-re() {
-  # re - fuzzy-find with rg + fzf (content search) and open in $EDITOR
+rc() {
+  # rc - fuzzy-find with rg + fzf (content search) and open in $EDITOR
   # Usage:
-  #   re [pattern] [directory]
+  #   rc [pattern] [directory]
   # Arguments:
   #   pattern     optional search pattern (if empty, shows all content)
   #   directory   optional directory to search in (defaults to current directory)
 
   setopt local_options pipefail
 
-  _rg_fzf -c re "$@"
+  _rg_fzf -c rc "$@"
   local ret=$?
   if [ "$ret" -ne 0 ]; then
     return $ret

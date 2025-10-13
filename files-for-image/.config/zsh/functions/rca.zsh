@@ -1,14 +1,14 @@
-rea() {
-  # rea - fuzzy-find with rg + fzf (content search, including hidden files) and open in $EDITOR
+rca() {
+  # rca - fuzzy-find with rg + fzf (content search, including hidden files) and open in $EDITOR
   # Usage:
-  #   rea [pattern] [directory]
+  #   rca [pattern] [directory]
   # Arguments:
   #   pattern     optional search pattern (if empty, shows all content)
   #   directory   optional directory to search in (defaults to current directory)
 
   setopt local_options pipefail
 
-  _rg_fzf -a -c rea "$@"
+  _rg_fzf -a -c rca "$@"
   local ret=$?
   if [ "$ret" -ne 0 ]; then
     return $ret

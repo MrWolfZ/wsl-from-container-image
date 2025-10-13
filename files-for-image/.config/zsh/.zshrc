@@ -422,15 +422,15 @@ fi
     # nda - same as nd but includes hidden files
     source "$ZDOTDIR/functions/nda.zsh"
 
-    # re - fuzzy-find with rg + fzf (content search) and open in $EDITOR
-    source "$ZDOTDIR/functions/re.zsh"
-    # rea - same as rc but includes hidden files
-    source "$ZDOTDIR/functions/rea.zsh"
+    # rc - fuzzy-find with rg + fzf (content search) and open in $EDITOR
+    source "$ZDOTDIR/functions/rc.zsh"
+    # rca - same as rc but includes hidden files
+    source "$ZDOTDIR/functions/rca.zsh"
 
-    # ne - fuzzy-find with fd + fzf (filename search) and open in $EDITOR
-    source "$ZDOTDIR/functions/ne.zsh"
-    # nea - same as nc but includes hidden files
-    source "$ZDOTDIR/functions/nea.zsh"
+    # nc - fuzzy-find with fd + fzf (filename search) and open in $EDITOR
+    source "$ZDOTDIR/functions/nc.zsh"
+    # nca - same as nc but includes hidden files
+    source "$ZDOTDIR/functions/nca.zsh"
 
   # utility functions
     host_ip() {
