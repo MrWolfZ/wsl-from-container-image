@@ -526,3 +526,14 @@ fi
     }
 
     zsh-defer -1 -c '_check_git_config'
+
+  # $HOME/.local/bin unlock reminder
+    _check_local_bin_unlocked() {
+      if [[ -w "$HOME/.local/bin" ]]; then
+        echo ""
+        echo "${COLOR_LIGHT_RED}\uf071 ATTENTION: ${COLOR_YELLOW}${HOME}/.local/bin${COLOR_LIGHT_RED} is unlocked${COLOR_RESET}"
+        echo ""
+      fi
+    }
+
+    zsh-defer -1 -c '_check_local_bin_unlocked'
