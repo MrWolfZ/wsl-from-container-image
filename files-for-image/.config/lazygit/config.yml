@@ -8,15 +8,45 @@ gui:
   tabWidth: 2
   skipAmendWarning: true
   skipDiscardChangeWarning: false
+  sidePanelWidth: 0.30
   timeFormat: '2006-01-02'
   shortTimeFormat: 3:04PM
   nerdFontsVersion: '3'
   showDivergenceFromBaseBranch: onlyArrow
   filterMode: fuzzy
+  theme:
+    selectedLineBgColor:
+      - black
+
+    # Main UI colors
+    activeBorderColor:
+      - '#ffca58'
+      - bold
+    inactiveBorderColor:
+      - '#858085'
+    searchingActiveBorderColor:
+      - '#49CAE4'
+      - bold
+    optionsTextColor:
+      - '#49CAE4'
+    defaultFgColor:
+      - '#FCFCFA'
+
+    # Status colors
+    unstagedChangesColor:
+      - '#FF7272'
+    cherryPickedCommitFgColor:
+      - '#49CAE4'
+    cherryPickedCommitBgColor:
+      - '#A093E2'
+    markedBaseCommitFgColor:
+      - '#49CAE4'
+    markedBaseCommitBgColor:
+      - '#FFCA58'
 
 git:
   # See https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_Pagers.md
-  paging:
+  paging: # to be changed in (likely) 0.56 to an array `pagers`
     colorArg: always
     pager: 'delta --dark --paging=never --line-numbers --side-by-side --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"'
 
