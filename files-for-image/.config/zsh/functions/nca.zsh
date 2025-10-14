@@ -21,13 +21,28 @@ nca() {
     return 130
   fi
 
+  # Convert to relative path for history
+  local rel_path=$(realpath --relative-to="$PWD" "$selection" 2>/dev/null || echo "$selection")
+
+  # Helper function to quote path if needed
+  local quoted_path
+  if [[ "$rel_path" =~ [[:space:]] ]] || [[ "$rel_path" =~ [\$\`\\\"\'] ]]; then
+    quoted_path="\"$rel_path\""
+  else
+    quoted_path="$rel_path"
+  fi
+
   if [[ -f "$selection" ]]; then
     if [[ "$EDITOR" == "code" ]]; then
+      print -s "code --reuse-window $quoted_path"
       code --reuse-window "$selection"
     else
+      local editor_cmd="${EDITOR:-nano}"
+      print -s "$editor_cmd $quoted_path"
       ${EDITOR:-nano} "$selection"
     fi
   else
+    print -s "code $quoted_path"
     code "$selection"
   fi
 

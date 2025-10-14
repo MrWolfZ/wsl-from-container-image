@@ -173,6 +173,7 @@ The shell includes a set of powerful search functions that combine modern CLI to
 - Functions with `a` suffix search hidden files/directories
 - Preview window shows file contents using bat with syntax highlighting (content search)
 - Preview window intelligently uses eza for directories and bat for files (filename search)
+- **History integration**: All `*c`, `*d`, and `*da` functions add their commands to zsh history with relative paths, allowing easy repetition via up-arrow or history search. Commands are properly quoted when paths contain spaces or special characters.
 
 ### Powerlevel10k Git Commit Segments
 

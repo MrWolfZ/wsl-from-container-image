@@ -22,6 +22,17 @@ nda() {
   fi
 
   local directory=$(dirname "$selection")
+
+  # Convert to relative path for history
+  local rel_dir=$(realpath --relative-to="$PWD" "$directory" 2>/dev/null || echo "$directory")
+
+  # Add to history with proper quoting
+  if [[ "$rel_dir" =~ [[:space:]] ]] || [[ "$rel_dir" =~ [\$\`\\\"\'] ]]; then
+    print -s "d \"$rel_dir\""
+  else
+    print -s "d $rel_dir"
+  fi
+
   z $directory
 
   return $?

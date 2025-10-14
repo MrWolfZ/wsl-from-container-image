@@ -26,6 +26,17 @@ rd() {
   filepath="$(printf '%s' "$selection" | awk -F: '{print $1}')"
 
   local directory=$(dirname "$filepath")
+
+  # Convert to relative path for history
+  local rel_dir=$(realpath --relative-to="$PWD" "$directory" 2>/dev/null || echo "$directory")
+
+  # Add to history with proper quoting
+  if [[ "$rel_dir" =~ [[:space:]] ]] || [[ "$rel_dir" =~ [\$\`\\\"\'] ]]; then
+    print -s "d \"$rel_dir\""
+  else
+    print -s "d $rel_dir"
+  fi
+
   z $directory
 
   return $?
