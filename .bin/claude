@@ -18,6 +18,8 @@ podman run --rm -it \
   -v "$PROJECT_DIR":"$PROJECT_DIR" \
   -w "$PROJECT_DIR" \
   -e TZ=Europe/Zurich \
-  --userns=keep-id \
+  --userns=keep-id:size=1000 \
+  --user=$(id -u) \
+  --group=$(id -g) \
   --name wsl-agent-claude-code \
   wsl-agent-claude-code --dangerously-skip-permissions $@
