@@ -1,5 +1,6 @@
 # TODO
 
+- ensure that sudo has access to micro by symlinking into /usr/bin
 - properly handle ctrl-backspace in micro settings for both windows terminal and vscode
 - fix k3s not working
 - create function claude-init which initializes the claude cli with a default setup
@@ -8,8 +9,6 @@
   - create build-tools layer
   - create podman variant
   - make the ai and dev variants derive from the podman variant
-- put podman binaries into $HOME/.local/bin (including all systemd references)
-  - make sure that the systemd service has the above in the PATH
 - update list of recommended extensions
 
 - (optional) add podman-tui
