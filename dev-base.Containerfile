@@ -163,12 +163,12 @@ RUN cd "$HOME/src" && \
     git clone https://github.com/rootless-containers/slirp4netns -b $SLIRP4NETNS_VERSION --depth 1 -c advice.detachedHead=false && \
     cd slirp4netns && \
     ./autogen.sh && \
-    ./configure && \
+    ./configure --prefix="$HOME/.local" && \
     make && \
-    echo "changeme" | sudo -S make install && \
+    make install && \
     git clean -dffx && git submodule foreach --recursive git clean -dffx && \
     echo "changeme" | sudo -S rm -rf /tmp/* && \
-    slirp4netns --version
+    PATH="$HOME/.local/bin:$PATH" slirp4netns --version
 
 FROM base as base-conmon
 
@@ -177,10 +177,10 @@ RUN cd "$HOME/src" && \
     git clone https://github.com/containers/conmon -b $CONMON_VERSION --depth 1 -c advice.detachedHead=false && \
     cd conmon && \
     make && \
-    echo "changeme" | sudo -S make install.bin && \
+    make PREFIX="$HOME/.local" install.bin && \
     git clean -dffx && git submodule foreach --recursive git clean -dffx && \
     echo "changeme" | sudo -S rm -rf /tmp/* && \
-    conmon --version
+    PATH="$HOME/.local/bin:$PATH" conmon --version
 
 FROM base-rust as base-netavark
 
@@ -191,10 +191,10 @@ RUN cd "$HOME/src" && \
     export PATH="$HOME/.cargo/bin:$PATH" && \
     sed -i 's/$(MAKE) -C docs install/#$(MAKE) -C docs install/' Makefile && \
     make build && \
-    echo "changeme" | sudo -S make install && \
+    make PREFIX="$HOME/.local" install && \
     git clean -dffx && git submodule foreach --recursive git clean -dffx && \
     echo "changeme" | sudo -S rm -rf /tmp/* && \
-    /usr/local/libexec/podman/netavark --version
+    PATH="$HOME/.local/libexec/podman:$PATH" netavark --version
 
 FROM base-rust as base-aardvark-dns
 
@@ -204,10 +204,10 @@ RUN cd "$HOME/src" && \
     cd aardvark-dns && \
     export PATH="$HOME/.cargo/bin:$PATH" && \
     make && \
-    echo "changeme" | sudo -S make install && \
+    make PREFIX="$HOME/.local" install && \
     git clean -dffx && git submodule foreach --recursive git clean -dffx && \
     echo "changeme" | sudo -S rm -rf /tmp/* && \
-    /usr/local/libexec/podman/aardvark-dns --version
+    PATH="$HOME/.local/libexec/podman:$PATH" aardvark-dns --version
 
 FROM base as base-crun
 
@@ -216,12 +216,12 @@ RUN cd "$HOME/src" && \
     git clone https://github.com/containers/crun -b $CRUN_VERSION --depth 1 -c advice.detachedHead=false && \
     cd crun && \
     ./autogen.sh && \
-    ./configure && \
+    ./configure --prefix="$HOME/.local" && \
     make && \
-    echo "changeme" | sudo -S make install && \
+    make install && \
     git clean -dffx && git submodule foreach --recursive git clean -dffx && \
     echo "changeme" | sudo -S rm -rf /tmp/* && \
-    crun --version
+    PATH="$HOME/.local/bin:$PATH" crun --version
 
 FROM base-golang as base-podman
 
@@ -232,14 +232,16 @@ RUN cd "$HOME/src" && \
     export GOCACHE="$PWD/.gocache" && \
     export PATH="$HOME/.golang/bin:$PATH" && \
     make BUILDTAGS="apparmor cni exclude_graphdriver_devicemapper selinux seccomp systemd" && \
-    echo "changeme" | sudo -S env "PATH=$HOME/.golang/bin:$PATH" make install && \
+    env "PATH=$HOME/.golang/bin:$PATH" make PREFIX="$HOME/.local" install && \
+    mkdir -p "$HOME/.local/share/systemd/user" && \
+    mv "$HOME/.local/lib/systemd/user/"* "$HOME/.local/share/systemd/user/" && \
     git clean -dffx && git submodule foreach --recursive git clean -dffx && \
     echo "changeme" | sudo -S rm -rf /tmp/* && \
     rm -rf "$HOME/go" && \
-    podman --version && \
-    podman-remote --version && \
-    podman completion zsh >  "$HOME/.config/zsh/completions/_podman" && \
-    podman-remote completion zsh >  "$HOME/.config/zsh/completions/_podman-remote"
+    PATH="$HOME/.local/bin:$PATH" podman --version && \
+    PATH="$HOME/.local/bin:$PATH" podman-remote --version && \
+    PATH="$HOME/.local/bin:$PATH" podman completion zsh >  "$HOME/.config/zsh/completions/_podman" && \
+    PATH="$HOME/.local/bin:$PATH" podman-remote completion zsh >  "$HOME/.config/zsh/completions/_podman-remote"
 
 FROM base-python as base-podman-compose
 
@@ -291,33 +293,29 @@ FROM base as base-container-tools
 
 COPY --from=base-containernetworking --chown=root:root /opt/cni/bin /opt/cni/bin
 
-COPY --from=base-slirp4netns --chown=root:root /usr/local/bin/slirp4netns /home/dev/.local/bin/
+COPY --from=base-slirp4netns --chown=root:root /home/dev/.local/bin/slirp4netns /home/dev/.local/bin/
 RUN PATH="$HOME/.local/bin:$PATH" slirp4netns --version
 
-COPY --from=base-conmon --chown=root:root /usr/local/bin/conmon /home/dev/.local/bin/
+COPY --from=base-conmon --chown=root:root /home/dev/.local/bin/conmon /home/dev/.local/bin/
 RUN PATH="$HOME/.local/bin:$PATH" conmon --version
 
-COPY --from=base-netavark --chown=root:root /usr/local/libexec/podman/netavark /usr/local/libexec/podman/
-COPY --from=base-netavark --chown=root:root /usr/local/lib/systemd/system/netavark* /usr/local/lib/systemd/system/
-RUN /usr/local/libexec/podman/netavark --version
+COPY --from=base-netavark --chown=root:root /home/dev/.local/libexec/podman/netavark /home/dev/.local/libexec/podman/
+RUN PATH="$HOME/.local/libexec/podman:$PATH" netavark --version
 
-COPY --from=base-aardvark-dns --chown=root:root /usr/local/libexec/podman/aardvark-dns /usr/local/libexec/podman/
-RUN /usr/local/libexec/podman/aardvark-dns --version
+COPY --from=base-aardvark-dns --chown=root:root /home/dev/.local/libexec/podman/aardvark-dns /home/dev/.local/libexec/podman/
+RUN PATH="$HOME/.local/libexec/podman:$PATH" aardvark-dns --version
 
-COPY --from=base-crun --chown=root:root /usr/local/bin/crun /home/dev/.local/bin/
+COPY --from=base-crun --chown=root:root /home/dev/.local/bin/crun /home/dev/.local/bin/
 RUN PATH="$HOME/.local/bin:$PATH" crun --version
 
-COPY --from=base-podman --chown=root:root /usr/local/bin/podman* /usr/local/bin/
-COPY --from=base-podman --chown=root:root /usr/local/libexec/podman/ /usr/local/libexec/podman/
-COPY --from=base-podman --chown=root:root /usr/local/lib/systemd/system/ /usr/local/lib/systemd/system/
-COPY --from=base-podman --chown=root:root /usr/local/lib/systemd/system-generators/ /usr/local/lib/systemd/system-generators/
-COPY --from=base-podman --chown=root:root /usr/local/lib/systemd/user/ /usr/local/lib/systemd/user/
-COPY --from=base-podman --chown=root:root /usr/local/lib/systemd/user-generators/ /usr/local/lib/systemd/user-generators/
-COPY --from=base-podman --chown=root:root /usr/local/share/man/man1/ /usr/local/share/man/man1/
-COPY --from=base-podman --chown=root:root /usr/local/share/man/man5/ /usr/local/share/man/man5/
-COPY --from=base-podman --chown=root:root /usr/local/share/man/man7/ /usr/local/share/man/man7/
+COPY --from=base-podman --chown=root:root /home/dev/.local/bin/podman* /home/dev/.local/bin/
+COPY --from=base-podman --chown=root:root /home/dev/.local/libexec/podman/ /home/dev/.local/libexec/podman/
+COPY --from=base-podman --chown=root:root /home/dev/.local/share/systemd/user/ /home/dev/.local/share/systemd/user/
+COPY --from=base-podman --chown=root:root /home/dev/.local/share/man/man1/ /home/dev/.local/share/man/man1/
+COPY --from=base-podman --chown=root:root /home/dev/.local/share/man/man5/ /home/dev/.local/share/man/man5/
+COPY --from=base-podman --chown=root:root /home/dev/.local/share/man/man7/ /home/dev/.local/share/man/man7/
 COPY --from=base-podman --chown=root:root /home/dev/.config/zsh/completions/* /home/dev/.config/zsh/completions/
-RUN podman --version && podman-remote --version
+RUN PATH="$HOME/.local/bin:$PATH" podman --version && PATH="$HOME/.local/bin:$PATH" podman-remote --version
 
 COPY --from=base-podman-compose --chown=root:root /home/dev/.local/bin/podman-compose /home/dev/.local/bin/
 RUN PATH="$HOME/.local/bin:$PATH" podman-compose --version
@@ -332,6 +330,12 @@ COPY --chown=root:root containers.conf registries.conf policy.json /home/dev/.co
 # enable the podman socket service so that other tools can use its docker-compatible API
 RUN systemctl enable --user podman.socket && \
     systemctl enable --user podman.service
+
+# create systemd drop-in to set PATH for podman services so they can find helper binaries
+RUN mkdir -p "$HOME/.config/systemd/user/podman.service.d" && \
+    printf '[Service]\nEnvironment="PATH=/home/dev/.local/bin:/home/dev/.local/libexec/podman:/usr/local/bin:/usr/bin:/bin"\n' > "$HOME/.config/systemd/user/podman.service.d/path.conf" && \
+    mkdir -p "$HOME/.config/systemd/user/podman.socket.d" && \
+    printf '[Service]\nEnvironment="PATH=/home/dev/.local/bin:/home/dev/.local/libexec/podman:/usr/local/bin:/usr/bin:/bin"\n' > "$HOME/.config/systemd/user/podman.socket.d/path.conf"
 
 FROM base as base-just
 

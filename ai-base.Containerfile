@@ -41,10 +41,9 @@ RUN PATH="$HOME/.local/bin:$PATH" slirp4netns --version
 COPY --from=dev-base /home/dev/.local/bin/conmon /home/dev/.local/bin/
 RUN PATH="$HOME/.local/bin:$PATH" conmon --version
 
-COPY --from=dev-base /usr/local/libexec/podman /usr/local/libexec/podman
-COPY --from=dev-base /usr/local/lib/systemd/system/netavark* /usr/local/lib/systemd/system/
-RUN /usr/local/libexec/podman/netavark --version
-RUN /usr/local/libexec/podman/aardvark-dns --version
+COPY --from=dev-base /home/dev/.local/libexec/podman /home/dev/.local/libexec/podman
+RUN PATH="$HOME/.local/libexec/podman:$PATH" netavark --version
+RUN PATH="$HOME/.local/libexec/podman:$PATH" aardvark-dns --version
 
 COPY --from=dev-base /home/dev/.local/bin/crun /home/dev/.local/bin/
 RUN PATH="$HOME/.local/bin:$PATH" crun --version
@@ -52,24 +51,30 @@ RUN PATH="$HOME/.local/bin:$PATH" crun --version
 COPY --from=dev-base /home/dev/.local/bin/lazydocker /home/dev/.local/bin/
 RUN PATH="$HOME/.local/bin:$PATH" lazydocker --version
 
-COPY --from=dev-base /usr/local/bin/podman* /usr/local/bin/
-COPY --from=dev-base /usr/local/lib/systemd/system/ /usr/local/lib/systemd/system/
-COPY --from=dev-base /usr/local/lib/systemd/system-generators/ /usr/local/lib/systemd/system-generators/
-COPY --from=dev-base /usr/local/lib/systemd/user/ /usr/local/lib/systemd/user/
-COPY --from=dev-base /usr/local/lib/systemd/user-generators/ /usr/local/lib/systemd/user-generators/
+COPY --from=dev-base /home/dev/.local/bin/podman* /home/dev/.local/bin/
+COPY --from=dev-base /home/dev/.local/share/systemd/user/ /home/dev/.local/share/systemd/user/
+COPY --from=dev-base /home/dev/.local/share/man/man1/ /home/dev/.local/share/man/man1/
+COPY --from=dev-base /home/dev/.local/share/man/man5/ /home/dev/.local/share/man/man5/
+COPY --from=dev-base /home/dev/.local/share/man/man7/ /home/dev/.local/share/man/man7/
 COPY --from=dev-base /home/dev/.config/zsh/completions/* /home/dev/.config/zsh/completions/
-RUN podman --version && podman-remote --version
+RUN PATH="$HOME/.local/bin:$PATH" podman --version && PATH="$HOME/.local/bin:$PATH" podman-remote --version
 
 # configure tools required by podman
 RUN echo "changeme" | sudo -S chmod u-s /usr/bin/new[gu]idmap && \
     echo "changeme" | sudo -S setcap cap_setuid+eip /usr/bin/newuidmap && \
     echo "changeme" | sudo -S setcap cap_setgid+eip /usr/bin/newgidmap
 
-COPY --chown=root:root containers.conf registries.conf policy.json /etc/containers/
+COPY --chown=root:root containers.conf registries.conf policy.json /home/dev/.config/containers/
 
 # enable the podman socket service so that other tools can use its docker-compatible API
 RUN systemctl enable --user podman.socket && \
     systemctl enable --user podman.service
+
+# create systemd drop-in to set PATH for podman services so they can find helper binaries
+RUN mkdir -p "$HOME/.config/systemd/user/podman.service.d" && \
+    printf '[Service]\nEnvironment="PATH=/home/dev/.local/bin:/home/dev/.local/libexec/podman:/usr/local/bin:/usr/bin:/bin"\n' > "$HOME/.config/systemd/user/podman.service.d/path.conf" && \
+    mkdir -p "$HOME/.config/systemd/user/podman.socket.d" && \
+    printf '[Service]\nEnvironment="PATH=/home/dev/.local/bin:/home/dev/.local/libexec/podman:/usr/local/bin:/usr/bin:/bin"\n' > "$HOME/.config/systemd/user/podman.socket.d/path.conf"
 
 FROM base-container-tools
 

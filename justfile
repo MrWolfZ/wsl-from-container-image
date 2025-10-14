@@ -386,6 +386,8 @@ run variant="dev":
     --rm \
     -e TERM="xterm-256color" \
     --name wsl-{{ variant }}-{{ version }}-{{ base_name }} \
+    --user=$(id -u) \
+    --userns=keep-id:size=1000 \
     wsl-{{ variant }}:{{ version }}-{{ base_name }} \
     zsh || true
 
