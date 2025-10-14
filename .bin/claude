@@ -8,15 +8,16 @@ PROJECT_DIR=$(realpath "$SCRIPT_DIR/..")
 mkdir -p ~/.claude
 
 if [ ! -f "$PROJECT_DIR/.claude/.claude.json" ]; then
-	echo '{}' >"$PROJECT_DIR/.claude/.claude.json"
+  echo '{}' >"$PROJECT_DIR/.claude/.claude.json"
 fi
 
 podman run --rm -it \
-	-v ~/.claude:"/home/$(whoami)/.claude" \
-	-v "$PROJECT_DIR"/.claude/.claude.json:/home/$(whoami)/.claude.json \
-	--mount=type=tmpfs,tmpfs-size=1G,destination=/tmpfs \
-	-v "$PROJECT_DIR":"$PROJECT_DIR" \
-	-w "$PROJECT_DIR" \
-	-e TZ=Europe/Zurich \
-	--userns=keep-id \
-	wsl-agent-claude-code --dangerously-skip-permissions $@
+  -v ~/.claude:"/home/$(whoami)/.claude" \
+  -v "$PROJECT_DIR"/.claude/.claude.json:/home/$(whoami)/.claude.json \
+  --mount=type=tmpfs,tmpfs-size=1G,destination=/tmpfs \
+  -v "$PROJECT_DIR":"$PROJECT_DIR" \
+  -w "$PROJECT_DIR" \
+  -e TZ=Europe/Zurich \
+  --userns=keep-id \
+  --name wsl-agent-claude-code \
+  wsl-agent-claude-code --dangerously-skip-permissions $@
