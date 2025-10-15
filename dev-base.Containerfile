@@ -337,6 +337,10 @@ RUN mkdir -p "$HOME/.config/systemd/user/podman.service.d" && \
     mkdir -p "$HOME/.config/systemd/user/podman.socket.d" && \
     printf '[Service]\nEnvironment="PATH=/home/dev/.local/bin:/home/dev/.local/libexec/podman:/usr/local/bin:/usr/bin:/bin"\n' > "$HOME/.config/systemd/user/podman.socket.d/path.conf"
 
+# configure cgroup delegation for k3s rootless mode
+RUN echo "changeme" | sudo -S mkdir -p /etc/systemd/system/user@.service.d
+COPY --chown=root:root etc/systemd/system/user@.service.d/delegate.conf /etc/systemd/system/user@.service.d/delegate.conf
+
 FROM base as base-just
 
 ARG JUST_VERSION
