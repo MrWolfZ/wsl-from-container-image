@@ -167,6 +167,15 @@ RUN curl -fLO "https://www.nano-editor.org/dist/v${NANO_VERSION%%.*}/nano-${NANO
     rm nano*.tar.xz && \
     rm -rf nano
 
+FROM base-with-dev-user as base-neovim
+
+ARG NEOVIM_VERSION
+RUN curl -fsSL "https://github.com/neovim/neovim/releases/download/${NEOVIM_VERSION}/nvim-linux64.tar.gz" -o /tmp/nvim.tar.gz && \
+    mkdir -p /tmp/nvim && \
+    tar -xzf /tmp/nvim.tar.gz -C /tmp/nvim --strip-components=1 && \
+    rm /tmp/nvim.tar.gz && \
+    mv /tmp/nvim "$HOME/.local/nvim"
+
 FROM base-with-dev-user as base-micro
 
 ARG MICRO_VERSION
@@ -270,6 +279,9 @@ COPY --from=base-nano --chown=dev:dev /home/dev/.local/share/locale /home/dev/.l
 COPY --from=base-nano --chown=dev:dev /home/dev/.local/share/info /home/dev/.local/share/info
 COPY --from=base-nano --chown=dev:dev /home/dev/.local/share/man /home/dev/.local/share/man
 RUN PATH="$HOME/.local/bin:$PATH" nano --version
+
+COPY --from=base-neovim --chown=root:root /home/dev/.local/nvim/ /home/dev/.local/
+RUN PATH="$HOME/.local/bin:$PATH" nvim --version
 
 COPY --from=base-micro --chown=root:root /home/dev/.local/bin/micro /home/dev/.local/bin/
 RUN PATH="$HOME/.local/bin:$PATH" micro --version

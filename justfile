@@ -188,7 +188,6 @@ nvidia_container_toolkit_version_arg := " --build-arg NVIDIA_CONTAINER_TOOLKIT_V
 
 base_build_args := (
   "--build-arg BASE_IMAGE=" + base_image
-  + neovim_version_arg
 )
 
 dev_build_args := (
@@ -245,6 +244,7 @@ shell_tools_build_args := (
   + lazygit_version_arg
   + direnv_version_arg
   + nano_version_arg
+  + neovim_version_arg
   + micro_version_arg
   + superfile_version_arg
   + yazi_version_arg

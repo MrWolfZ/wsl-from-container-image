@@ -8,9 +8,9 @@ This project builds custom WSL (Windows Subsystem for Linux) distributions from 
 
 ### Build System Flow
 
-1. **Base Layer** (`base.Containerfile`) - Ubuntu 24.04 foundation with system packages, dev user, and essential tools
+1. **Base Layer** (`base.Containerfile`) - Ubuntu 24.04 foundation with system packages, dev user, and essential tools (single-stage build)
 2. **Variant Base Layer** (`{variant}-base.Containerfile`) - Variant-specific development tools and runtimes
-3. **Shell Layer** (`shell-tools.Containerfile`) - Shell configuration, modern CLI tools (eza, bat, fzf, fd, ripgrep, zoxide, btop, delta, direnv, lazygit, nano), and powerlevel10k theme
+3. **Shell Layer** (`shell-tools.Containerfile`) - Shell configuration, modern CLI tools (eza, bat, fzf, fd, ripgrep, zoxide, btop, delta, direnv, lazygit, nano, neovim, micro, superfile, yazi, shfmt), and powerlevel10k theme
 4. **Export & Import** - Container exported as tar, then imported into WSL via Windows CMD scripts
 
 ### Multi-Stage Build Strategy
@@ -28,7 +28,7 @@ The `shell-tools.Containerfile` uses a two-tier build argument strategy for opti
 - **`BASE_IMAGE`** - Used by the `base-with-dev-user` stage and all tool download/compilation stages
 - **`VARIANT_BASE_IMAGE`** - Used only by the final assembly stage
 
-The `base-with-dev-user` stage (which sets `USER dev`, `SHELL ["/bin/bash", "-c"]`, and `WORKDIR /home/dev`) serves as the base for all tool download stages (`base-gitstatus`, `base-direnv`, `base-ripgrep`, `base-fzf`, `base-fd`, `base-zoxide`, `base-eza`, `base-bat`, `base-btop`, `base-delta`, `base-lazygit`, `base-nano`). This intermediate stage ensures that:
+The `base-with-dev-user` stage (which sets `USER dev`, `SHELL ["/bin/bash", "-c"]`, and `WORKDIR /home/dev`) serves as the base for all tool download stages (`base-gitstatus`, `base-direnv`, `base-ripgrep`, `base-fzf`, `base-fd`, `base-zoxide`, `base-eza`, `base-bat`, `base-btop`, `base-delta`, `base-lazygit`, `base-nano`, `base-neovim`, `base-micro`, `base-superfile`, `base-yazi`, `base-shfmt`). This intermediate stage ensures that:
 
 1. All tool stages run as the `dev` user (not root)
 2. Shell tool downloads are cached independently of variant-specific changes

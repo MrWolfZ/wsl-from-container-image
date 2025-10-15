@@ -1,5 +1,5 @@
 ARG BASE_IMAGE
-FROM ${BASE_IMAGE} as base-os
+FROM ${BASE_IMAGE}
 
 # create an initial fully upgraded ubuntu installation
 RUN export TIMEZONE=Europe/Zurich && \
@@ -41,8 +41,6 @@ RUN export TIMEZONE=Europe/Zurich && \
     dpkg-reconfigure locales && \
     update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 && \
     rm -rf /var/cache/debconf/*
-
-FROM base-os as base-with-tools
 
 # install tools for C development (useful for building other projects from source)
 RUN apt-get update && \
@@ -132,15 +130,3 @@ RUN mkdir /home/dev/.cache && \
     mkdir /home/dev/.ssh && \
     mkdir /home/dev/src && \
     chown -R dev:dev /home/dev
-
-FROM base-os AS base-neovim
-
-ARG NEOVIM_VERSION
-RUN curl -fsSL "https://github.com/neovim/neovim/releases/download/${NEOVIM_VERSION}/nvim-linux64.tar.gz" -o /tmp/nvim.tar.gz && \
-    mkdir -p /tmp/nvim && \
-    tar -xzf /tmp/nvim.tar.gz -C /tmp/nvim --strip-components=1 && \
-    rm /tmp/nvim.tar.gz
-
-FROM base-with-tools
-
-COPY --from=base-neovim --chown=dev:dev /tmp/nvim /home/dev/.local
