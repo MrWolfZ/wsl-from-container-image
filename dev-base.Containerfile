@@ -353,6 +353,9 @@ RUN mkdir -p "$HOME/.config/systemd/user/podman.service.d" && \
 RUN echo "changeme" | sudo -S mkdir -p /etc/systemd/system/user@.service.d
 COPY --chown=root:root etc/systemd/system/user@.service.d/delegate.conf /etc/systemd/system/user@.service.d/delegate.conf
 
+# copy over sysctl config for k3s
+COPY --chown=root:root etc/sysctl.conf.d/20-ipv4-forward.conf /etc/sysctl.conf.d/
+
 FROM base as base-just
 
 ARG JUST_VERSION
@@ -622,3 +625,6 @@ RUN PATH="$HOME/.local/bin:$PATH" k9s version
 FROM base-tools
 
 RUN rm .sudo_as_admin_successful || true
+
+# copy over sysctl config for to enable file watchers on big repos
+COPY --chown=root:root etc/sysctl.conf.d/20-fs-inotify-max-user.conf /etc/sysctl.conf.d/

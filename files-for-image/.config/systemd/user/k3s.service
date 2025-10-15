@@ -1,10 +1,30 @@
+# systemd unit file for k3s (rootless)
+#
+# Usage:
+# - [Optional] Enable cgroup v2 delegation, see https://rootlesscontaine.rs/getting-started/common/cgroup2/ .
+#   This step is optional, but highly recommended for enabling CPU and memory resource limitation.
+#
+# - Copy this file as `~/.config/systemd/user/k3s.service`.
+#   Installing this file as a system-wide service (`/etc/systemd/...`) is not supported.
+#
+# - Run `systemctl --user daemon-reload`
+#
+# - Run `systemctl --user enable --now k3s`
+#
+# - Run `KUBECONFIG=~/.kube/k3s.yaml kubectl get pods -A`, and make sure the pods are running.
+#
+# Troubleshooting:
+# - See `systemctl --user status k3s` to check the daemon status
+# - See `journalctl --user -f -u k3s` to see the daemon log
+# - See also https://rootlesscontaine.rs/
+
 [Unit]
 Description=Lightweight Kubernetes (k3s) - Rootless
 Documentation=https://k3s.io
 After=network-online.target
 
 [Service]
-Type=notify
+Type=simple
 # WorkingDirectory must be writable by the rootless user
 WorkingDirectory=%h
 # Run rootless mode with persistent state in home directory
@@ -12,9 +32,11 @@ WorkingDirectory=%h
 # Traefik ingress controller is enabled by default for testing ingress resources
 ExecStart=%h/.local/bin/k3s server \
     --rootless \
+    --snapshotter=fuse-overlayfs \
     --data-dir=%h/.local/share/k3s \
     --disable=servicelb \
     --write-kubeconfig-mode=644
+ExecReload=/bin/kill -s HUP $MAINPID
 KillMode=mixed
 Delegate=yes
 # Having non-zero Limit*s causes performance problems due to accounting overhead
@@ -24,8 +46,11 @@ LimitNPROC=infinity
 LimitCORE=infinity
 TasksMax=infinity
 TimeoutStartSec=0
+StartLimitBurst=3
+StartLimitInterval=60s
 Restart=on-failure
-RestartSec=5s
+RestartSec=5
+TimeoutSec=0
 
 [Install]
 WantedBy=default.target

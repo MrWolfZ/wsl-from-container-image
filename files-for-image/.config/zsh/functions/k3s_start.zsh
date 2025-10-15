@@ -1,6 +1,15 @@
 # Start k3s rootless service
 function k3s_start() {
+
+  if systemctl --user is-active --quiet k3s; then
+    echo "k3s is already running."
+    return 0
+  fi
+
   echo "Starting k3s service..."
+
+  rm -f "$HOME/.kube/k3s.yaml"
+
   systemctl --user start k3s
 
   if [ $? -eq 0 ]; then
@@ -10,16 +19,17 @@ function k3s_start() {
     # Wait for kubeconfig to be created
     local max_wait=30
     local waited=0
-    while [ ! -f "$HOME/.local/share/k3s/server/cred/admin.kubeconfig" ] && [ $waited -lt $max_wait ]; do
+    while [ ! -f "$HOME/.kube/k3s.yaml" ] && [ $waited -lt $max_wait ]; do
       sleep 1
       waited=$((waited + 1))
     done
 
-    if [ -f "$HOME/.local/share/k3s/server/cred/admin.kubeconfig" ]; then
+    if [ -f "$HOME/.kube/k3s.yaml" ]; then
       echo "k3s is ready!"
       echo ""
-      echo "To use kubectl with k3s, set:"
-      echo "  export KUBECONFIG=\$HOME/.local/share/k3s/server/cred/admin.kubeconfig"
+      echo "To use kubectl with k3s in another shell, set:"
+      echo "  export KUBECONFIG=\$HOME/.kube/k3s.yaml"
+      export KUBECONFIG="$HOME/.kube/k3s.yaml"
     else
       echo "Warning: kubeconfig not found after ${max_wait}s. Check service status with: systemctl --user status k3s"
     fi
