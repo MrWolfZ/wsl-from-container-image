@@ -62,6 +62,10 @@ dive_version_arg := " --build-arg DIVE_VERSION=" + dive_version
 lazydocker_version := "v0.24.1"
 lazydocker_version_arg := " --build-arg LAZYDOCKER_VERSION=" + lazydocker_version
 
+# https://github.com/containers/podman-tui/tags
+podman_tui_version := "v1.9.0"
+podman_tui_version_arg := " --build-arg PODMAN_TUI_VERSION=" + podman_tui_version
+
 # https://github.com/casey/just/tags
 just_version := "1.43.0"
 just_version_arg := " --build-arg JUST_VERSION=" + just_version
@@ -202,6 +206,7 @@ dev_build_args := (
   + podman_version_arg
   + dive_version_arg
   + lazydocker_version_arg
+  + podman_tui_version_arg
   + just_version_arg
   + kubectl_version_arg
   + helm_version_arg

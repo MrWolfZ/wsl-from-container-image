@@ -286,6 +286,18 @@ RUN curl -fLO "https://github.com/jesseduffield/lazydocker/releases/download/${L
     rm -rf lazydocker && \
     "$HOME/.local/bin/lazydocker" --version
 
+FROM base as base-podman-tui
+
+ARG PODMAN_TUI_VERSION
+RUN curl -fLO "https://github.com/containers/podman-tui/releases/download/${PODMAN_TUI_VERSION}/podman-tui-release-linux_amd64.zip" && \
+    curl -fLO "https://github.com/containers/podman-tui/releases/download/${PODMAN_TUI_VERSION}/sha256sum" && \
+    sha256sum --check --ignore-missing sha256sum && rm sha256sum && \
+    unzip podman-tui*.zip -d ./podman-tui && \
+    mv ./podman-tui/podman-tui*/podman-tui*/podman-tui "$HOME/.local/bin/" && \
+    rm podman-tui*.zip && \
+    rm -rf podman-tui && \
+    "$HOME/.local/bin/podman-tui" version
+
 FROM base as base-container-tools
 
 # note that we can unfortunately not use $HOME in the target directories for
@@ -540,6 +552,9 @@ RUN PATH="$HOME/.local/bin:$PATH" dive --version
 
 COPY --from=base-lazydocker --chown=root:root /home/dev/.local/bin/lazydocker /home/dev/.local/bin/
 RUN PATH="$HOME/.local/bin:$PATH" lazydocker --version
+
+COPY --from=base-podman-tui --chown=root:root /home/dev/.local/bin/podman-tui /home/dev/.local/bin/
+RUN PATH="$HOME/.local/bin:$PATH" podman-tui version
 
 COPY --from=base-just --chown=root:root /home/dev/.local/bin/just /home/dev/.local/bin/
 COPY --from=base-just --chown=root:root /home/dev/.config/zsh/completions/* /home/dev/.config/zsh/completions/
