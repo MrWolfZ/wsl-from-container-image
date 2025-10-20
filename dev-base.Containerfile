@@ -108,7 +108,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --pr
 
 FROM base as base-python
 
-# install tools for go development (rename go dir to golang to work around `make` issue when a `go` dir is in path)
+# install tools for python development
 ARG UV_VERSION
 ARG PYTHON_VERSION
 RUN curl -fLO "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-musl.tar.gz" && \
