@@ -27,14 +27,11 @@ rda() {
 
   local directory=$(dirname "$filepath")
 
-  # Convert to relative path for history
-  local rel_dir=$(realpath --relative-to="$PWD" "$directory" 2>/dev/null || echo "$directory")
-
   # Add to history with proper quoting
-  if [[ "$rel_dir" =~ [[:space:]] ]] || [[ "$rel_dir" =~ [\$\`\\\"\'] ]]; then
-    print -s "d \"$rel_dir\""
+  if [[ "$directory" =~ [[:space:]] ]] || [[ "$directory" =~ [\$\`\\\"\'] ]]; then
+    print -s "d \"$directory\""
   else
-    print -s "d $rel_dir"
+    print -s "d $directory"
   fi
 
   z $directory

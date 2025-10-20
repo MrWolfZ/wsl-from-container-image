@@ -21,15 +21,12 @@ nca() {
     return 130
   fi
 
-  # Convert to relative path for history
-  local rel_path=$(realpath --relative-to="$PWD" "$selection" 2>/dev/null || echo "$selection")
-
   # Helper function to quote path if needed
   local quoted_path
-  if [[ "$rel_path" =~ [[:space:]] ]] || [[ "$rel_path" =~ [\$\`\\\"\'] ]]; then
-    quoted_path="\"$rel_path\""
+  if [[ "$selection" =~ [[:space:]] ]] || [[ "$selection" =~ [\$\`\\\"\'] ]]; then
+    quoted_path="\"$selection\""
   else
-    quoted_path="$rel_path"
+    quoted_path="$selection"
   fi
 
   if [[ -f "$selection" ]]; then
