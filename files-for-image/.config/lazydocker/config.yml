@@ -1,0 +1,20 @@
+gui:
+  scrollHeight: 4
+  language: en
+  border: rounded
+  theme:
+    activeBorderColor:
+      - '#ffca58'
+      - bold
+    inactiveBorderColor:
+      - '#858085'
+    selectedLineBgColor:
+      - black
+    optionsTextColor:
+      - '#49CAE4'
+logs:
+  timestamps: false
+  since: '60m' # set to '' to show all logs
+  tail: '' # set to 200 to show last 200 lines of logs
+commandTemplates:
+  dockerCompose: podman compose
