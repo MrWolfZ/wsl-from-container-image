@@ -404,7 +404,7 @@ export variant="dev":
 
   {{ container_tool }} rm -f wsl-{{ variant }}-{{ version }}-{{ base_name }} > /dev/null 2>&1
   {{ container_tool }} run --name wsl-{{ variant }}-{{ version }}-{{ base_name }} -d wsl-{{ variant }}:{{ version }}-{{ base_name }} sleep infinity
-  {{ container_tool }} export wsl-{{ variant }}-{{ version }}-{{ base_name }} | pv -s $image_size > .build-{{ variant }}/{{ version }}-{{ variant }}-{{ base_name }}2.tar
+  {{ container_tool }} export wsl-{{ variant }}-{{ version }}-{{ base_name }} | pv -s $image_size > .build-{{ variant }}/{{ version }}-{{ variant }}-{{ base_name }}.tar
   {{ container_tool }} stop wsl-{{ variant }}-{{ version }}-{{ base_name }} -t 1
   {{ container_tool }} rm wsl-{{ variant }}-{{ version }}-{{ base_name }}
 
