@@ -63,45 +63,45 @@ keybinding:
   universal:
     quit: q
     quit-alt1: <c-c>
-    suspendApp: <c-z>
+    suspendApp: <disabled>
     return: <esc>
     quitWithoutChangingDirectory: Q
     togglePanel: <tab>
     prevItem: <up>
     nextItem: <down>
-    prevItem-alt: k
-    nextItem-alt: j
-    prevPage: ','
-    nextPage: .
-    scrollLeft: H
-    scrollRight: L
-    gotoTop: <
-    gotoBottom: '>'
-    gotoTop-alt: <home>
-    gotoBottom-alt: <end>
+    prevItem-alt: <disabled>
+    nextItem-alt: <disabled>
+    prevPage: <left>
+    nextPage: <right>
+    scrollLeft: '<'
+    scrollRight: '>'
+    gotoTop: <home>
+    gotoBottom: <end>
+    gotoTop-alt: <disabled>
+    gotoBottom-alt: <disabled>
     toggleRangeSelect: v
     rangeSelectDown: <s-down>
     rangeSelectUp: <s-up>
-    prevBlock: <left>
-    nextBlock: <right>
-    prevBlock-alt: h
-    nextBlock-alt: l
-    nextBlock-alt2: <tab>
-    prevBlock-alt2: <backtab>
+    prevBlock: '('
+    nextBlock: ')'
+    prevBlock-alt: <disabled>
+    nextBlock-alt: <disabled>
+    prevBlock-alt2: <disabled>
+    nextBlock-alt2: <disabled>
     jumpToBlock:
       - '1'
       - '2'
       - '3'
       - '4'
       - '5'
-    focusMainView: '0'
+    focusMainView: <backtab>
     nextMatch: 'n'
     prevMatch: 'N'
     startSearch: /
     optionMenu: <disabled>
     optionMenu-alt1: '?'
-    select: <space>
-    goInto: <enter>
+    select: <tab>
+    goInto: '.'
     confirm: <enter>
     confirmMenu: <enter>
     confirmSuggestion: <enter>
@@ -113,26 +113,22 @@ keybinding:
     openFile: o
     scrollUpMain: <pgup>
     scrollDownMain: <pgdown>
-    scrollUpMain-alt1: K
-    scrollDownMain-alt1: J
-    scrollUpMain-alt2: <c-u>
-    scrollDownMain-alt2: <c-d>
+    scrollUpMain-alt1: <disabled>
+    scrollDownMain-alt1: <disabled>
+    scrollUpMain-alt2: <disabled>
+    scrollDownMain-alt2: <disabled>
     executeShellCommand: ':'
     createRebaseOptionsMenu: m
-
-    # 'Files' appended for legacy reasons
-    pushFiles: P
-
-    # 'Files' appended for legacy reasons
-    pullFiles: p
+    pushFiles: p
+    pullFiles: u
     refresh: R
     createPatchOptionsMenu: <c-p>
-    nextTab: ']'
-    prevTab: '['
+    nextTab: '}'
+    prevTab: '{'
     nextScreenMode: +
-    prevScreenMode: _
-    undo: z
-    redo: Z
+    prevScreenMode: '-'
+    undo: <c-z>
+    redo: <c-y>
     filteringMenu: <c-s>
     diffingMenu: W
     diffingMenu-alt: <c-e>
@@ -140,11 +136,11 @@ keybinding:
     openRecentRepos: <c-r>
     submitEditorText: <enter>
     extrasMenu: '@'
-    toggleWhitespaceInDiffView: <c-w>
-    increaseContextInDiffView: '}'
-    decreaseContextInDiffView: '{'
-    increaseRenameSimilarityThreshold: )
-    decreaseRenameSimilarityThreshold: (
+    toggleWhitespaceInDiffView: ';'
+    increaseContextInDiffView: ']'
+    decreaseContextInDiffView: '['
+    increaseRenameSimilarityThreshold: ','
+    decreaseRenameSimilarityThreshold: "'"
     openDiffTool: <c-t>
   status:
     checkForUpdate: u
@@ -168,8 +164,8 @@ keybinding:
     openMergeOptions: M
     openStatusFilter: <c-b>
     copyFileInfoToClipboard: 'y'
-    collapseAll: '-'
-    expandAll: =
+    collapseAll: '|'
+    expandAll: '='
   branches:
     createPullRequest: o
     viewPullRequestOptions: O
