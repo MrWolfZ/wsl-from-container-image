@@ -58,9 +58,8 @@ uv() {
       return $?
     fi
 
-    # Use the official uv container image
-    # Use latest tag for simplicity (uv handles Python version internally)
-    local IMAGE="ghcr.io/astral-sh/uv:latest"
+    local UBUNTU_VERSION=$(grep VERSION_ID /etc/os-release | cut -d'=' -f2 | tr -d '"')
+    local IMAGE="docker.io/library/ubuntu:$UBUNTU_VERSION"
 
     # Sandboxing only makes sens with virtual environments, so we create one if it does not exist
     if [[ ! -d ".venv" ]]; then
@@ -87,7 +86,7 @@ uv() {
     PODMAN_ARGS+=(--userns=keep-id)
 
     # mount project; :Z applies SELinux labeling when needed (harmless otherwise)
-    PODMAN_ARGS+=(-v "${PWD}:${PWD}:Z")
+    PODMAN_ARGS+=(-v "${PWD}:${PWD}:ro,Z")
 
     # Mount any pip.conf / .pypirc files found in the current directory hierarchy
     local _dir _pip_conf_path _pypirc_path
@@ -137,26 +136,36 @@ uv() {
       _dir="$(dirname "$_dir")"
     done
 
-    # mount .venv separately to ensure install writes to host venv
+    # mount .venv separately as writable
     PODMAN_ARGS+=(-v "${PWD}/.venv:${PWD}/.venv:Z")
     PODMAN_ARGS+=(-w ${PWD})
 
     # mount uv directories to make symlinks work correctly
     # (venv symlinks point to ~/.local/share/uv/python/...)
+    local UV_PATH="${HOME}/.local/bin/uv"
     local UV_CACHE_DIR="${HOME}/.cache/uv"
     local UV_DATA_DIR="${HOME}/.local/share/uv"
     mkdir -p "$UV_CACHE_DIR" "$UV_DATA_DIR"
+
+    PODMAN_ARGS+=(-v "${UV_PATH}:${UV_PATH}:ro,Z")
     PODMAN_ARGS+=(-v "${UV_CACHE_DIR}:${UV_CACHE_DIR}:Z")
-    PODMAN_ARGS+=(-v "${UV_DATA_DIR}:${UV_DATA_DIR}:Z")
+    PODMAN_ARGS+=(-v "${UV_DATA_DIR}:${UV_DATA_DIR}:ro,Z")
+
+    # specify uv as the entrypoint
+    PODMAN_ARGS+=(--entrypoint "${UV_PATH}")
 
     # use actual HOME so paths match and symlinks work
     PODMAN_ARGS+=(--env "HOME=${HOME}")
+
     PODMAN_ARGS+=(--security-opt no-new-privileges)
     PODMAN_ARGS+=(--cap-drop ALL)
 
     # set a few sensible environment variables
     PODMAN_ARGS+=(--env "VIRTUAL_ENV=${PWD}/.venv")
     PODMAN_ARGS+=(--env "UV_PROJECT_ENVIRONMENT=${PWD}/.venv")
+    PODMAN_ARGS+=(--env "UV_MANAGED_ENVIRONMENT=true")
+    PODMAN_ARGS+=(--env "UV_PYTHON=$PWD/.venv/bin/python")
+    PODMAN_ARGS+=(--env "UV_LINK_MODE=copy")
 
     # make sure image exists (pull if missing)
     if ! podman image exists "$IMAGE"; then
