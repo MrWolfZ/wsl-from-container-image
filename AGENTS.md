@@ -172,10 +172,11 @@ The shell includes a set of powerful search functions that combine modern CLI to
 **Features:**
 
 - Pattern parameter is optional; if omitted, shows all content/files for interactive fzf filtering
-- When a pattern is provided, it's used as the initial fzf query via `--query`
+- When a pattern is provided for filename search, it's passed to fzf via `--query` (not to fd); fd always lists all files and fzf handles filtering
+- When a pattern is provided for content search, it's used as the initial fzf query via `--query`
 - All functions accept an optional directory parameter (defaults to current directory)
 - `n` and `na` functions set the `$selected_path` global variable with the selected path for use in subsequent commands
-- Content search uses ripgrep's regex syntax and follows symlinks; filename search uses fd's pattern matching
+- Content search uses ripgrep's regex syntax and follows symlinks; filename search uses fzf's fuzzy matching
 - `*c` functions intelligently detect VS Code Server availability and fall back to `$EDITOR` if not present
 - `nc` and `nca` functions reuse the current VS Code window only for files; directories open in a new window
 - Functions with `a` suffix search hidden files/directories; for content search, also ignores .gitignore (passes `--hidden --no-ignore` to ripgrep)

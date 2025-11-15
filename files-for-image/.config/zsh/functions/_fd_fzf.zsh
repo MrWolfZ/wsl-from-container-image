@@ -36,35 +36,15 @@ _fd_fzf() {
     no_ignore_opt="--no-ignore"
   fi
 
-  # If pattern is empty, skip initial match check and go straight to fzf
-  if [ -z "$pattern" ]; then
-    # No pattern: run fd for all files and let fzf handle filtering
-    local selection
-    selection="$(fd $hidden_opt $no_ignore_opt --absolute-path --color=always . "$search_dir" |
-      fzf --reverse --ansi --preview 'if [ -d {} ]; then eza --color=always --icons=always --group-directories-first --long --all --git {}; else bat --color=always --style=numbers,changes --line-range :500 {}; fi')"
-
-    local ret=$?
-
-    # user cancelled fzf
-    if [ "$ret" -ne 0 ]; then
-      REPLY=
-      return $ret
-    fi
-
-    REPLY="$selection"
-    return 0
+  # Always run fd without filtering and let fzf handle the pattern via --query
+  local fzf_query=""
+  if [ -n "$pattern" ]; then
+    fzf_query="--query=$pattern"
   fi
 
-  # Quick check to see if there are any results
-  if ! fd $hidden_opt $no_ignore_opt --absolute-path --max-results=1 "$pattern" "$search_dir" &>/dev/null; then
-    _err "$command_name: no files matched the pattern"
-    return 3
-  fi
-
-  # Run through fzf with preview
   local selection
   selection="$(fd $hidden_opt $no_ignore_opt --absolute-path --color=always . "$search_dir" |
-    fzf --reverse --ansi --query="$pattern" --preview 'if [ -d {} ]; then eza --color=always --icons=always --group-directories-first --long --all --git {}; else bat --color=always --style=numbers,changes --line-range :500 {}; fi')"
+    fzf --reverse --ansi $fzf_query --preview 'if [ -d {} ]; then eza --color=always --icons=always --group-directories-first --long --all --git {}; else bat --color=always --style=numbers,changes --line-range :500 {}; fi')"
 
   local ret=$?
 
@@ -75,5 +55,5 @@ _fd_fzf() {
   fi
 
   REPLY="$selection"
-  return $?
+  return 0
 }
