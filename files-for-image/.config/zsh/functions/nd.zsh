@@ -21,7 +21,13 @@ nd() {
     return 130
   fi
 
-  local directory=$(dirname "$selection")
+  # If selection is a directory, use it directly; otherwise use parent directory
+  local directory
+  if [ -d "$selection" ]; then
+    directory="$selection"
+  else
+    directory=$(dirname "$selection")
+  fi
 
   # Add to history with proper quoting
   if [[ "$directory" =~ [[:space:]] ]] || [[ "$directory" =~ [\$\`\\\"\'] ]]; then

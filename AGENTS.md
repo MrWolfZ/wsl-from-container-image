@@ -156,7 +156,7 @@ The shell includes a set of powerful search functions that combine modern CLI to
 
 - `n [pattern] [directory]` - Search filenames and return file path
 - `na [pattern] [directory]` - Same as `n` but includes hidden files
-- `nd [pattern] [directory]` - Search filenames and navigate to containing directory
+- `nd [pattern] [directory]` - Search filenames and navigate to directory (or parent if file)
 - `nda [pattern] [directory]` - Same as `nd` but includes hidden files
 - `nc [pattern] [directory]` - Search filenames and open in VS Code (or $EDITOR)
 - `nca [pattern] [directory]` - Same as `nc` but includes hidden files
