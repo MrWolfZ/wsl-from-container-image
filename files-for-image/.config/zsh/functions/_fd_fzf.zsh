@@ -44,7 +44,7 @@ _fd_fzf() {
 
   local selection
   selection="$(fd $hidden_opt $no_ignore_opt --absolute-path --color=always . "$search_dir" |
-    fzf --reverse --ansi $fzf_query --preview 'if [ -d {} ]; then eza --color=always --icons=always --group-directories-first --long --all --git {}; else bat --color=always --style=numbers,changes --line-range :500 {}; fi')"
+    fzf $fzf_query --preview 'if [ -d {} ]; then eza --color=always --icons=always --group-directories-first --long --all --git {}; else bat --color=always --style=numbers,changes --line-range :500 {}; fi')"
 
   local ret=$?
 

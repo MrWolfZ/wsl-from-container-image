@@ -69,7 +69,7 @@ _rg_fzf() {
           # Metadata is displayed but not searched; content is both displayed and searched
           printf "%-*s %*s %*s\t%s\t%s\n", maxw, f, line_width, line_colored, col_width, col_colored, m, $0
         }' |
-      fzf --reverse --delimiter=$'\t' --with-nth=1,2 --nth=2 --ansi \
+      fzf --delimiter=$'\t' --with-nth=1,2 --nth=2 \
         --preview='line=$(echo {3} | cut -d: -f2); file=$(echo {3} | cut -d: -f1); bat --style=numbers --color=always --paging=never --highlight-line "$line" --line-range $((line > 10 ? line - 10 : 1)):$((line + 10)) "$file" 2>/dev/null || echo "Preview unavailable"' \
         --preview-window='down:60%:wrap')"
 
@@ -143,7 +143,7 @@ _rg_fzf() {
           # Metadata is displayed but not searched; content is both displayed and searched
           printf "%-*s %*s %*s\t%s\t%s\n", maxw, f, line_width, line_colored, col_width, col_colored, m, $0
         }' |
-    fzf --reverse --delimiter=$'\t' --with-nth=1,2 --nth=2 --ansi --query="$pattern" \
+    fzf --delimiter=$'\t' --with-nth=1,2 --nth=2 --query="$pattern" \
       --preview='line=$(echo {3} | cut -d: -f2); file=$(echo {3} | cut -d: -f1); bat --style=numbers --color=always --paging=never --highlight-line "$line" --line-range $((line > 10 ? line - 10 : 1)):$((line + 10)) "$file" 2>/dev/null || echo "Preview unavailable"' \
       --preview-window='down:60%:wrap')"
 
