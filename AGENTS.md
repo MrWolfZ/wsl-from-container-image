@@ -168,7 +168,6 @@ The shell includes a set of powerful search functions that combine modern CLI to
 - All functions accept an optional directory parameter (defaults to current directory)
 - `n` and `na` functions set the `$selected_path` global variable with the selected path for use in subsequent commands
 - Content search uses ripgrep's regex syntax and follows symlinks; filename search uses fd's pattern matching
-- Auto-selects single results without opening fzf when a pattern is provided (performance optimization)
 - `*c` functions intelligently detect VS Code Server availability and fall back to `$EDITOR` if not present
 - `nc` and `nca` functions reuse the current VS Code window only for files; directories open in a new window
 - Functions with `a` suffix search hidden files/directories; for content search, also ignores .gitignore (passes `--hidden --no-ignore` to ripgrep)

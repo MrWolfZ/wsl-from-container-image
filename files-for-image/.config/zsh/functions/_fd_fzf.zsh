@@ -55,26 +55,13 @@ _fd_fzf() {
     return 0
   fi
 
-  # Run fd pipeline and capture results (limit to 2 for performance)
-  local results
-  results="$(fd $hidden_opt $no_ignore_opt --absolute-path --max-results=2 "$pattern" "$search_dir" 2>/dev/null)"
-
-  if [ -z "$results" ]; then
+  # Quick check to see if there are any results
+  if ! fd $hidden_opt $no_ignore_opt --absolute-path --max-results=1 "$pattern" "$search_dir" &>/dev/null; then
     _err "$command_name: no files matched the pattern"
     return 3
   fi
 
-  # Count number of results (max 2)
-  local count
-  count="$(printf '%s\n' "$results" | wc -l)"
-
-  # If only one result, return it directly
-  if [ "$count" -eq 1 ]; then
-    REPLY="$results"
-    return 0
-  fi
-
-  # Multiple results: run through fzf with preview
+  # Run through fzf with preview
   local selection
   selection="$(fd $hidden_opt $no_ignore_opt --absolute-path --color=always . "$search_dir" |
     fzf --reverse --ansi --query="$pattern" --preview 'if [ -d {} ]; then eza --color=always --icons=always --group-directories-first --long --all --git {}; else bat --color=always --style=numbers,changes --line-range :500 {}; fi')"

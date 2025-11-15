@@ -87,26 +87,13 @@ _rg_fzf() {
   fi
 
   # Content search: search inside files and open at match
-  # Run rg and capture raw results (limit to 2 for performance)
-  local raw_results
-  raw_results="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} --color=never --smart-case --max-count=2 "$pattern" "$search_dir" 2>/dev/null | head -n 2)"
-
-  if [ -z "$raw_results" ]; then
+  # Quick check to see if there are any results
+  if ! rg --follow --line-number --column --no-heading ${hidden_opt[@]} --color=never --smart-case --max-count=1 "$pattern" "$search_dir" &>/dev/null; then
     _err "$command_name: no matches found for pattern."
     return 3
   fi
 
-  # Count number of results (max 2)
-  local count
-  count="$(printf '%s\n' "$raw_results" | wc -l)"
-
-  # If only one result, return it directly
-  if [ "$count" -eq 1 ]; then
-    REPLY="$raw_results"
-    return 0
-  fi
-
-  # Multiple results: run rg again with color and format for fzf
+  # Run rg again with color and format for fzf
   local selected_line
 
   # simple list without formatting if you prefer
