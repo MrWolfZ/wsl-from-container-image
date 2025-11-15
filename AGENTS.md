@@ -140,6 +140,13 @@ The shell uses fzf-tab to replace zsh's default completion menu with fzf for int
 
 See `.zshrc` lines 80-102 (fzf-tab configuration) and lines 107-131 (LS_COLORS handling) for implementation details.
 
+**FZF History Search (Ctrl+R):**
+
+The fzf history search is configured for an optimal search experience:
+
+- **UI layout**: Full-height interface with reverse layout (input at top) and border
+- **Configuration**: `FZF_CTRL_R_OPTS='--height=100% --layout=reverse --border'` (set in `.zshrc` line 374)
+
 ### Search Functions
 
 The shell includes a set of powerful search functions that combine modern CLI tools (ripgrep, fd) with fzf for fast file finding:

@@ -371,6 +371,7 @@ fi
 
   # set up navigation and search functionality
     # set up fzf key bindings
+    export FZF_CTRL_R_OPTS='--height=100% --layout=reverse --border'
     source "$ZDOTDIR/fzf.zsh"
 
     # di - fuzzy-find with zoxide + fzf and navigate to directory
