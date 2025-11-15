@@ -158,8 +158,8 @@ The shell includes a set of powerful search functions that combine modern CLI to
 - `ra [pattern] [directory]` - Same as `r` but includes hidden files and ignores .gitignore (uses `--hidden --no-ignore`)
 - `rd [pattern] [directory]` - Search file contents and navigate to containing directory
 - `rda [pattern] [directory]` - Same as `rd` but includes hidden files and ignores .gitignore (uses `--hidden --no-ignore`)
-- `rc [pattern] [directory]` - Search file contents and open in VS Code (or $EDITOR) at exact line/column
-- `rca [pattern] [directory]` - Same as `rc` but includes hidden files and ignores .gitignore (uses `--hidden --no-ignore`)
+- `rc [pattern] [directory]` - Search file contents and open in VS Code (or $EDITOR) at exact line/column. Supports multi-selection (Tab/Shift+Tab).
+- `rca [pattern] [directory]` - Same as `rc` but includes hidden files and ignores .gitignore (uses `--hidden --no-ignore`). Supports multi-selection (Tab/Shift+Tab).
 
 **Filename Search (search filenames using fd):**
 
@@ -185,6 +185,7 @@ The shell includes a set of powerful search functions that combine modern CLI to
 - **Filename search preview**: Intelligently uses eza for directories and bat for files
 - **History integration**: All `*c`, `*d`, and `*da` functions add their commands to zsh history, allowing easy repetition via up-arrow or history search. Commands are properly quoted when paths contain spaces or special characters.
 - **Path resolution**: Content search functions (`r*`) return absolute paths resolved from the search directory, ensuring editor commands work correctly regardless of current directory.
+- **Multi-selection**: `rc` and `rca` support selecting multiple files in fzf using Tab (select) and Shift+Tab (deselect). All selected files are opened in the editor, with VS Code receiving goto positions for each file.
 
 ### Powerlevel10k Git Commit Segments
 

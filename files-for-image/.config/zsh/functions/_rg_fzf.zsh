@@ -1,9 +1,10 @@
 _rg_fzf() {
   # _rg_fzf - fuzzy-find with rg + fzf (content search only)
   # Usage:
-  #   _rg_fzf [-a] [-c <command_name>] [pattern] [directory]
+  #   _rg_fzf [-a] [-m] [-c <command_name>] [pattern] [directory]
   # Options:
   #   -a  include hidden files
+  #   -m  enable multi-selection
   #   -c  the name of the calling command to show in messages
   # Arguments:
   #   pattern     optional search pattern (if empty, shows all files)
@@ -11,13 +12,17 @@ _rg_fzf() {
 
   setopt local_options pipefail
 
-  local include_hidden=false command_name="_rg_fzf"
+  local include_hidden=false multi_select=false command_name="_rg_fzf"
 
   # Parse only known flags; treat anything else as positional arguments
   while [[ $# -gt 0 ]]; do
     case "$1" in
     -a)
       include_hidden=true
+      shift
+      ;;
+    -m)
+      multi_select=true
       shift
       ;;
     -c)
@@ -58,11 +63,16 @@ _rg_fzf() {
     --colors 'column:style:bold'
   )
 
+  local -a fzf_multi_opt=()
+  if $multi_select; then
+    fzf_multi_opt=(--multi)
+  fi
+
   # If pattern is empty, skip initial match check and go straight to fzf
   if [ -z "$pattern" ]; then
     # No pattern: run rg for all files and let fzf handle filtering
-    local selected_line
-    selected_line="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} ${rg_color_opts[@]} --smart-case '' "$search_dir" 2>/dev/null |
+    local selected_lines
+    selected_lines="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} ${rg_color_opts[@]} --smart-case '' "$search_dir" 2>/dev/null |
       awk -F: -v maxw=60 '{
           # reassemble match (fields 4..NF)
           m = ""; for(i=4;i<=NF;i++) m = m (i==4 ? "" : ":") $i;
@@ -93,14 +103,11 @@ _rg_fzf() {
           # Metadata is displayed but not searched; content is both displayed and searched
           printf "%-*s %*s %*s\t%s\t%s\n", maxw, f, line_width, line_colored, col_width, col_colored, m, $0
         }' |
-      fzf --delimiter=$'\t' --with-nth=1,2 --nth=2 \
+      fzf --delimiter=$'\t' --with-nth=1,2 --nth=2 ${fzf_multi_opt[@]} \
         --preview='line=$(echo {3} | cut -d: -f2); file=$(echo {3} | cut -d: -f1); bat --style=numbers --color=always --paging=never --highlight-line "$line" --line-range $((line > 10 ? line - 10 : 1)):$((line + 10)) "$file" 2>/dev/null || echo "Preview unavailable"' \
         --preview-window='down:60%:wrap')"
 
     local ret=$?
-
-    # extract the original rg line (field 3)
-    selected_line="${selected_line##*$'\t'}"
 
     # if user cancelled fzf
     if [ "$ret" -ne 0 ]; then
@@ -108,16 +115,24 @@ _rg_fzf() {
       return $ret
     fi
 
-    # Convert relative path to absolute
-    local file_path="${selected_line%%:*}"
-    local rest_of_line="${selected_line#*:}"
-    if [[ "$file_path" != /* ]]; then
-      file_path="$search_dir/$file_path"
-    fi
-    file_path="$(realpath "$file_path")"
-    selected_line="$file_path:$rest_of_line"
+    # Process selected lines (could be one or multiple)
+    local -a processed_lines=()
+    while IFS= read -r line; do
+      # extract the original rg line (field 3)
+      line="${line##*$'\t'}"
 
-    REPLY="$selected_line"
+      # Convert relative path to absolute
+      local file_path="${line%%:*}"
+      local rest_of_line="${line#*:}"
+      if [[ "$file_path" != /* ]]; then
+        file_path="$search_dir/$file_path"
+      fi
+      file_path="$(realpath "$file_path")"
+      processed_lines+=("$file_path:$rest_of_line")
+    done <<< "$selected_lines"
+
+    # Join with newlines
+    REPLY="${(F)processed_lines}"
     return 0
   fi
 
@@ -129,14 +144,14 @@ _rg_fzf() {
   fi
 
   # Run rg again with color and format for fzf
-  local selected_line
+  local selected_lines
 
   # simple list without formatting if you prefer
-  # selected_line="$(rg --line-number --column --no-heading ${hidden_opt[@]} --smart-case -- "$pattern" "$search_dir" \
+  # selected_lines="$(rg --line-number --column --no-heading ${hidden_opt[@]} --smart-case -- "$pattern" "$search_dir" \
   #   | fzf --height=40% --reverse --delimiter ':')"
 
   # fancy formatting with columns
-  selected_line="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} ${rg_color_opts[@]} --smart-case -- "$pattern" "$search_dir" 2>/dev/null |
+  selected_lines="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} ${rg_color_opts[@]} --smart-case -- "$pattern" "$search_dir" 2>/dev/null |
     awk -F: -v maxw=60 '{
           # reassemble match (fields 4..NF)
           m = ""; for(i=4;i<=NF;i++) m = m (i==4 ? "" : ":") $i;
@@ -167,14 +182,11 @@ _rg_fzf() {
           # Metadata is displayed but not searched; content is both displayed and searched
           printf "%-*s %*s %*s\t%s\t%s\n", maxw, f, line_width, line_colored, col_width, col_colored, m, $0
         }' |
-    fzf --delimiter=$'\t' --with-nth=1,2 --nth=2 --query="$pattern" \
+    fzf --delimiter=$'\t' --with-nth=1,2 --nth=2 --query="$pattern" ${fzf_multi_opt[@]} \
       --preview='line=$(echo {3} | cut -d: -f2); file=$(echo {3} | cut -d: -f1); bat --style=numbers --color=always --paging=never --highlight-line "$line" --line-range $((line > 10 ? line - 10 : 1)):$((line + 10)) "$file" 2>/dev/null || echo "Preview unavailable"' \
       --preview-window='down:60%:wrap')"
 
   local ret=$?
-
-  # extract the original rg line (field 3)
-  selected_line="${selected_line##*$'\t'}"
 
   # if user cancelled fzf
   if [ "$ret" -ne 0 ]; then
@@ -182,15 +194,23 @@ _rg_fzf() {
     return $ret
   fi
 
-  # Convert relative path to absolute
-  local file_path="${selected_line%%:*}"
-  local rest_of_line="${selected_line#*:}"
-  if [[ "$file_path" != /* ]]; then
-    file_path="$search_dir/$file_path"
-  fi
-  file_path="$(realpath "$file_path")"
-  selected_line="$file_path:$rest_of_line"
+  # Process selected lines (could be one or multiple)
+  local -a processed_lines=()
+  while IFS= read -r line; do
+    # extract the original rg line (field 3)
+    line="${line##*$'\t'}"
 
-  REPLY="$selected_line"
+    # Convert relative path to absolute
+    local file_path="${line%%:*}"
+    local rest_of_line="${line#*:}"
+    if [[ "$file_path" != /* ]]; then
+      file_path="$search_dir/$file_path"
+    fi
+    file_path="$(realpath "$file_path")"
+    processed_lines+=("$file_path:$rest_of_line")
+  done <<< "$selected_lines"
+
+  # Join with newlines
+  REPLY="${(F)processed_lines}"
   return $?
 }

@@ -5,59 +5,80 @@ rc() {
   # Arguments:
   #   pattern     optional search pattern (if empty, shows all content)
   #   directory   optional directory to search in (defaults to current directory)
+  # Features:
+  #   - Multi-selection: Use Tab to select multiple files, Shift+Tab to deselect
 
   setopt local_options pipefail
 
-  _rg_fzf -c rc "$@"
+  _rg_fzf -m -c rc "$@"
   local ret=$?
   if [ "$ret" -ne 0 ]; then
     return $ret
   fi
 
-  local selection="$REPLY"
+  local selections="$REPLY"
 
   # no selection was made
-  if [ -z "$selection" ]; then
+  if [ -z "$selections" ]; then
     return 130
   fi
 
-  # Extract file:line (and column if available) and open in existing window with goto
-  # selection format: file:line:column:match...  (column may be absent)
-  local file part_line part_col file_and_pos
-  file="$(printf '%s' "$selection" | awk -F: '{print $1}')"
-  part_line="$(printf '%s' "$selection" | awk -F: '{print $2}')"
-  part_col="$(printf '%s' "$selection" | awk -F: '{print $3}')"
+  # Process selections (could be one or multiple)
+  local -a file_positions=()
+  local -a files=()
+  local selection file part_line part_col file_and_pos
+
+  while IFS= read -r selection; do
+    # Extract file:line (and column if available)
+    # selection format: file:line:column:match...  (column may be absent)
+    file="$(printf '%s' "$selection" | awk -F: '{print $1}')"
+    part_line="$(printf '%s' "$selection" | awk -F: '{print $2}')"
+    part_col="$(printf '%s' "$selection" | awk -F: '{print $3}')"
+
+    if [[ "$EDITOR" == "code" ]]; then
+      # build file:line or file:line:column
+      if [ -n "$part_col" ] && [ "$part_col" != "" ]; then
+        file_and_pos="$file:$part_line:$part_col"
+      else
+        file_and_pos="$file:$part_line"
+      fi
+      file_positions+=("$file_and_pos")
+    else
+      files+=("$file")
+    fi
+  done <<< "$selections"
 
   if [[ "$EDITOR" == "code" ]]; then
-    # build file:line or file:line:column for both execution and history
-    if [ -n "$part_col" ] && [ "$part_col" != "" ]; then
-      file_and_pos="$file:$part_line:$part_col"
-      local rel_pos="$file:$part_line:$part_col"
-    else
-      file_and_pos="$file:$part_line"
-      local rel_pos="$file:$part_line"
-    fi
+    # Build command for history
+    local cmd="code --reuse-window --goto"
+    for pos in "${file_positions[@]}"; do
+      if [[ "$pos" =~ [[:space:]] ]] || [[ "$pos" =~ [\$\`\\\"\'] ]]; then
+        cmd="$cmd \"$pos\""
+      else
+        cmd="$cmd $pos"
+      fi
+    done
+    print -s "$cmd"
 
-    # Add to history with proper quoting
-    if [[ "$rel_pos" =~ [[:space:]] ]] || [[ "$rel_pos" =~ [\$\`\\\"\'] ]]; then
-      print -s "code --reuse-window --goto \"$rel_pos\""
-    else
-      print -s "code --reuse-window --goto $rel_pos"
-    fi
-
-    code --reuse-window --goto "$file_and_pos"
+    # Open all files in VS Code
+    code --reuse-window --goto "${file_positions[@]}"
   else
-    # $EDITOR doesn't support goto syntax, just open the file
+    # $EDITOR doesn't support goto syntax, just open the files
     local editor_cmd="${EDITOR:-nano}"
 
-    # Add to history with proper quoting
-    if [[ "$file" =~ [[:space:]] ]] || [[ "$file" =~ [\$\`\\\"\'] ]]; then
-      print -s "$editor_cmd \"$file\""
-    else
-      print -s "$editor_cmd $file"
-    fi
+    # Build command for history
+    local cmd="$editor_cmd"
+    for file in "${files[@]}"; do
+      if [[ "$file" =~ [[:space:]] ]] || [[ "$file" =~ [\$\`\\\"\'] ]]; then
+        cmd="$cmd \"$file\""
+      else
+        cmd="$cmd $file"
+      fi
+    done
+    print -s "$cmd"
 
-    ${EDITOR:-nano} "$file"
+    # Open all files
+    ${EDITOR:-nano} "${files[@]}"
   fi
   return $?
 }
