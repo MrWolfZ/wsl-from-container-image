@@ -187,6 +187,48 @@ The shell includes a set of powerful search functions that combine modern CLI to
 - **Path resolution**: Content search functions (`r*`) return absolute paths resolved from the search directory, ensuring editor commands work correctly regardless of current directory.
 - **Multi-selection**: `rc` and `rca` support selecting multiple files in fzf using Tab (select) and Shift+Tab (deselect). All selected files are opened in the editor, with VS Code receiving goto positions for each file.
 
+### Process Management Functions
+
+The shell includes interactive process management functions that use fzf for selecting processes to send signals to:
+
+**Process Kill Functions:**
+
+- `killf <signal> [query]` - Interactively select user processes and send signal
+- `killfa <signal> [query]` - Interactively select from all processes (system-wide) and send signal
+
+**Arguments:**
+
+- `signal` (required) - Signal to send (e.g., `-9`, `-15`, `-TERM`, `-KILL`)
+- `query` (optional) - String passed to fzf as `--query` to prefilter the process list
+
+**Features:**
+
+- **Multi-selection**: Use Tab to select multiple processes, Shift+Tab to deselect. All selected processes receive the signal.
+- **Process filtering**: `killf` shows only processes owned by the current user; `killfa` shows all processes system-wide
+- **Process preview**: Shows detailed process information (PID, PPID, user, start time, CPU time, memory, command) in the preview window
+- **Interactive search**: Filter processes in real-time using fzf's fuzzy matching
+- **Formatted display**: Processes displayed with aligned columns showing PID, user, %CPU, %MEM, and command
+- **Safe operation**: Requires explicit signal parameter and interactive selection before sending signals
+
+**Usage examples:**
+
+```bash
+# Kill a user process with SIGTERM (graceful shutdown)
+killf -15
+
+# Kill a user process with SIGKILL (force kill)
+killf -9
+
+# Search for "python" processes and kill with SIGTERM
+killf -15 python
+
+# Kill any system process (requires appropriate permissions)
+killfa -9 nginx
+
+# Kill multiple processes at once (select with Tab)
+killf -15  # Then use Tab to select multiple processes
+```
+
 ### Powerlevel10k Git Commit Segments
 
 Custom p10k segments that display information about the latest git commit. These segments are highly optimized with intelligent caching to avoid repeated git calls.

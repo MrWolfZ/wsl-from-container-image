@@ -372,7 +372,7 @@ fi
   # set up navigation and search functionality
     # see here for reference: https://vitormv.github.io/fzf-themes/
 		FZF_COLORS="--color=fg:#fcfcfc,hl:#f40c42,hl+:#f40c42,info:#ffca58,prompt:#ffca58,pointer:#ffca58,marker:#ffca58,spinner:#369cea,header:#369cea"
-    export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --ansi $FZF_COLORS"
+    export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --no-hscroll --no-mouse --ansi $FZF_COLORS"
     export FZF_CTRL_R_OPTS="$FZF_DEFAULT_OPTS"
 
     # set up fzf key bindings
@@ -462,6 +462,11 @@ fi
 
     # direnv_list - list direnv-exported environment variables
     source "$ZDOTDIR/functions/direnv_list.zsh"
+
+    # killf and killfa - send signal to processes via fzf
+    source "$ZDOTDIR/functions/_kill_fzf.zsh"
+    source "$ZDOTDIR/functions/killf.zsh"
+    source "$ZDOTDIR/functions/killfa.zsh"
 
   # zsh-abbr
     # general configurations: https://zsh-abbr.olets.dev/configuration-variables.html
