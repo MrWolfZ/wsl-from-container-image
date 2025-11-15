@@ -134,6 +134,7 @@ The shell uses fzf-tab to replace zsh's default completion menu with fzf for int
 - **Git checkout**: Sorting disabled to preserve chronological branch order (most recent branches appear first)
 - **cd preview**: Shows detailed eza listing when completing cd commands (all files, icons, git status)
 - **UI layout**: Full-height interface with reverse layout (input at top) and border for visual clarity
+- **Case-insensitive search**: Search is case-insensitive by default via the `-i` flag
 - **Group switching**: Use `<` and `>` keys to switch between completion groups (e.g., files vs directories, external vs builtin commands)
 - **Compatibility**: Works alongside zshzoo compstyle; overrides `menu` setting and all format-related zstyles
 

@@ -121,8 +121,8 @@ fi
   # fzf-tab: preview directory contents with eza when completing cd
   zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --all --long --group-directories-first --icons=always --color=always $realpath'
 
-  # fzf-tab: full-height interface with reverse layout and border
-  zstyle ':fzf-tab:*' fzf-flags --height=100% --layout=reverse --border
+  # fzf-tab: full-height interface with reverse layout, border, and case-insensitive search
+  zstyle ':fzf-tab:*' fzf-flags --height=100% --layout=reverse --border -i
 
   # fzf-tab: switch between completion groups using '<' and '>'
   zstyle ':fzf-tab:*' switch-group '<' '>'
