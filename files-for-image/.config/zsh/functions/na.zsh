@@ -21,6 +21,9 @@ na() {
     return 130
   fi
 
+  # assign to global variable for use in calling shell
+  typeset -g selected_path="$selection"
+
   echo -n "$selection"
   return $?
 }

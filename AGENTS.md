@@ -154,8 +154,8 @@ The shell includes a set of powerful search functions that combine modern CLI to
 
 **Filename Search (search filenames using fd):**
 
-- `n [pattern] [directory]` - Search filenames and return file path
-- `na [pattern] [directory]` - Same as `n` but includes hidden files
+- `n [pattern] [directory]` - Search filenames and return file path (also sets `$selected_path` variable)
+- `na [pattern] [directory]` - Same as `n` but includes hidden files (also sets `$selected_path` variable)
 - `nd [pattern] [directory]` - Search filenames and navigate to directory (or parent if file)
 - `nda [pattern] [directory]` - Same as `nd` but includes hidden files
 - `nc [pattern] [directory]` - Search filenames and open in VS Code (or $EDITOR)
@@ -166,6 +166,7 @@ The shell includes a set of powerful search functions that combine modern CLI to
 - Pattern parameter is optional; if omitted, shows all content/files for interactive fzf filtering
 - When a pattern is provided, it's used as the initial fzf query via `--query`
 - All functions accept an optional directory parameter (defaults to current directory)
+- `n` and `na` functions set the `$selected_path` global variable with the selected path for use in subsequent commands
 - Content search uses ripgrep's regex syntax; filename search uses fd's pattern matching
 - Auto-selects single results without opening fzf when a pattern is provided (performance optimization)
 - `*c` functions intelligently detect VS Code Server availability and fall back to `$EDITOR` if not present
