@@ -67,7 +67,7 @@ keybinding:
     suspendApp: <disabled>
     return: <esc>
     quitWithoutChangingDirectory: Q
-    togglePanel: <tab>
+    togglePanel: <disabled>
     prevItem: <up>
     nextItem: <down>
     prevItem-alt: <disabled>
@@ -91,10 +91,10 @@ keybinding:
     nextBlock-alt2: <disabled>
     jumpToBlock:
       - '1'
-      - '2'
-      - '3'
       - '4'
       - '5'
+      - '6'
+      - '2'
     focusMainView: <backtab>
     nextMatch: 'n'
     prevMatch: 'N'
@@ -182,7 +182,7 @@ keybinding:
     fastForward: f
     createTag: T
     pushTag: P
-    setUpstream: u
+    setUpstream: U
     fetchRemote: f
     sortOrder: s
   worktrees:
@@ -195,8 +195,8 @@ keybinding:
     markCommitAsFixup: f
     createFixupCommit: F
     squashAboveCommits: S
-    moveDownCommit: <c-j>
-    moveUpCommit: <c-k>
+    moveDownCommit: D
+    moveUpCommit: U
     amendToCommit: A
     resetCommitAuthor: a
     pickCommit: p
@@ -205,7 +205,7 @@ keybinding:
     pasteCommits: V
     markCommitAsBaseForRebase: B
     tagCommit: T
-    checkoutCommit: <space>
+    checkoutCommit: <tab>
     resetCherryPick: <c-R>
     copyCommitAttributeToClipboard: 'y'
     openLogMenu: <c-l>
