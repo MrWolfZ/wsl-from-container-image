@@ -12,16 +12,27 @@ _fd_fzf() {
   setopt local_options pipefail
 
   local include_hidden=false command_name="_fd_fzf"
-  local OPTIND opt
 
-  while getopts "ac:" opt; do
-    case "$opt" in
-    a) include_hidden=true ;;
-    c) command_name=$OPTARG ;;
-    *) ;;
+  # Parse only known flags; treat anything else as positional arguments
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    -a)
+      include_hidden=true
+      shift
+      ;;
+    -c)
+      if [[ $# -lt 2 ]]; then
+        break
+      fi
+      command_name="$2"
+      shift 2
+      ;;
+    *)
+      # Not a recognized flag, stop parsing and treat as positional argument
+      break
+      ;;
     esac
   done
-  shift $((OPTIND - 1))
 
   # helper for red error
   _err() { printf '\e[31m%s\e[0m\n' "$*" >&2; }
@@ -43,7 +54,7 @@ _fd_fzf() {
   fi
 
   local selection
-  selection="$(fd $hidden_opt $no_ignore_opt --absolute-path --color=always . "$search_dir" |
+  selection="$(fd $hidden_opt $no_ignore_opt --absolute-path --color=always -- . "$search_dir" |
     fzf $fzf_query --preview 'if [ -d {} ]; then eza --color=always --icons=always --group-directories-first --long --all --git {}; else bat --color=always --style=numbers,changes --line-range :500 {}; fi')"
 
   local ret=$?

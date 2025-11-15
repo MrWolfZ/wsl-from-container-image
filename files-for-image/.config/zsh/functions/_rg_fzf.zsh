@@ -12,16 +12,27 @@ _rg_fzf() {
   setopt local_options pipefail
 
   local include_hidden=false command_name="_rg_fzf"
-  local OPTIND opt
 
-  while getopts "ac:" opt; do
-    case "$opt" in
-    a) include_hidden=true ;;
-    c) command_name=$OPTARG ;;
-    *) ;;
+  # Parse only known flags; treat anything else as positional arguments
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    -a)
+      include_hidden=true
+      shift
+      ;;
+    -c)
+      if [[ $# -lt 2 ]]; then
+        break
+      fi
+      command_name="$2"
+      shift 2
+      ;;
+    *)
+      # Not a recognized flag, stop parsing and treat as positional argument
+      break
+      ;;
     esac
   done
-  shift $((OPTIND - 1))
 
   # helper for red error
   _err() { printf '\e[31m%s\e[0m\n' "$*" >&2; }
@@ -112,7 +123,7 @@ _rg_fzf() {
 
   # Content search: search inside files and open at match
   # Quick check to see if there are any results
-  if ! rg --follow --line-number --column --no-heading ${hidden_opt[@]} --color=never --smart-case --max-count=1 "$pattern" "$search_dir" &>/dev/null; then
+  if ! rg --follow --line-number --column --no-heading ${hidden_opt[@]} --color=never --smart-case --max-count=1 -- "$pattern" "$search_dir" &>/dev/null; then
     _err "$command_name: no matches found for pattern."
     return 3
   fi
@@ -121,11 +132,11 @@ _rg_fzf() {
   local selected_line
 
   # simple list without formatting if you prefer
-  # selected_line="$(rg --line-number --column --no-heading ${hidden_opt[@]} --smart-case "$pattern" "$search_dir" \
+  # selected_line="$(rg --line-number --column --no-heading ${hidden_opt[@]} --smart-case -- "$pattern" "$search_dir" \
   #   | fzf --height=40% --reverse --delimiter ':')"
 
   # fancy formatting with columns
-  selected_line="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} ${rg_color_opts[@]} --smart-case "$pattern" "$search_dir" 2>/dev/null |
+  selected_line="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} ${rg_color_opts[@]} --smart-case -- "$pattern" "$search_dir" 2>/dev/null |
     awk -F: -v maxw=60 '{
           # reassemble match (fields 4..NF)
           m = ""; for(i=4;i<=NF;i++) m = m (i==4 ? "" : ":") $i;
