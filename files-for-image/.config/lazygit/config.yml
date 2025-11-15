@@ -14,6 +14,7 @@ gui:
   nerdFontsVersion: '3'
   showDivergenceFromBaseBranch: onlyArrow
   filterMode: fuzzy
+  mouseEvents: false
   theme:
     selectedLineBgColor:
       - black
