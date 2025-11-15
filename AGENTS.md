@@ -146,11 +146,11 @@ The shell includes a set of powerful search functions that combine modern CLI to
 **Content Search (search inside files using ripgrep):**
 
 - `r [pattern] [directory]` - Search file contents and return file path
-- `ra [pattern] [directory]` - Same as `r` but includes hidden files
+- `ra [pattern] [directory]` - Same as `r` but includes hidden files and ignores .gitignore (uses `--hidden --no-ignore`)
 - `rd [pattern] [directory]` - Search file contents and navigate to containing directory
-- `rda [pattern] [directory]` - Same as `rd` but includes hidden files
+- `rda [pattern] [directory]` - Same as `rd` but includes hidden files and ignores .gitignore (uses `--hidden --no-ignore`)
 - `rc [pattern] [directory]` - Search file contents and open in VS Code (or $EDITOR) at exact line/column
-- `rca [pattern] [directory]` - Same as `rc` but includes hidden files
+- `rca [pattern] [directory]` - Same as `rc` but includes hidden files and ignores .gitignore (uses `--hidden --no-ignore`)
 
 **Filename Search (search filenames using fd):**
 
@@ -170,7 +170,7 @@ The shell includes a set of powerful search functions that combine modern CLI to
 - Auto-selects single results without opening fzf when a pattern is provided (performance optimization)
 - `*c` functions intelligently detect VS Code Server availability and fall back to `$EDITOR` if not present
 - `nc` and `nca` functions reuse the current VS Code window only for files; directories open in a new window
-- Functions with `a` suffix search hidden files/directories
+- Functions with `a` suffix search hidden files/directories; for content search, also ignores .gitignore (passes `--hidden --no-ignore` to ripgrep)
 - Preview window shows file contents using bat with syntax highlighting (content search)
 - Preview window intelligently uses eza for directories and bat for files (filename search)
 - **History integration**: All `*c`, `*d`, and `*da` functions add their commands to zsh history with relative paths, allowing easy repetition via up-arrow or history search. Commands are properly quoted when paths contain spaces or special characters.
