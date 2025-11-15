@@ -34,11 +34,24 @@ _rg_fzf() {
     hidden_opt=(--hidden --no-ignore)
   fi
 
+  # see https://github.com/BurntSushi/ripgrep/blob/master/FAQ.md#how-do-i-configure-ripgreps-colors
+  local -a rg_color_opts=(
+    '--color=always'
+    --colors 'match:fg:magenta'
+    --colors 'match:style:nobold'
+    --colors 'path:fg:cyan'
+    --colors 'path:style:nobold'
+    --colors 'line:fg:green'
+    --colors 'line:style:bold'
+    --colors 'column:fg:yellow'
+    --colors 'column:style:bold'
+  )
+
   # If pattern is empty, skip initial match check and go straight to fzf
   if [ -z "$pattern" ]; then
     # No pattern: run rg for all files and let fzf handle filtering
     local selected_line
-    selected_line="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} --color=always --smart-case '' "$search_dir" 2>/dev/null |
+    selected_line="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} ${rg_color_opts[@]} --smart-case '' "$search_dir" 2>/dev/null |
       awk -F: -v maxw=60 '{
           # reassemble match (fields 4..NF)
           m = ""; for(i=4;i<=NF;i++) m = m (i==4 ? "" : ":") $i;
@@ -112,7 +125,7 @@ _rg_fzf() {
   #   | fzf --height=40% --reverse --delimiter ':')"
 
   # fancy formatting with columns
-  selected_line="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} --color=always --smart-case "$pattern" "$search_dir" 2>/dev/null |
+  selected_line="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} ${rg_color_opts[@]} --smart-case "$pattern" "$search_dir" 2>/dev/null |
     awk -F: -v maxw=60 '{
           # reassemble match (fields 4..NF)
           m = ""; for(i=4;i<=NF;i++) m = m (i==4 ? "" : ":") $i;

@@ -370,9 +370,12 @@ fi
     export USE_GKE_GCLOUD_AUTH_PLUGIN='True'
 
   # set up navigation and search functionality
-    # set up fzf key bindings
-    export FZF_DEFAULT_OPTS='--height=100% --layout=reverse --ansi --border'
+    # see here for reference: https://vitormv.github.io/fzf-themes/
+		FZF_COLORS="--color=fg:#fcfcfc,hl:#f40c42,hl+:#f40c42,info:#ffca58,prompt:#ffca58,pointer:#ffca58,marker:#ffca58,spinner:#369cea,header:#369cea"
+    export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --ansi $FZF_COLORS"
     export FZF_CTRL_R_OPTS="$FZF_DEFAULT_OPTS"
+
+    # set up fzf key bindings
     source "$ZDOTDIR/fzf.zsh"
 
     # di - fuzzy-find with zoxide + fzf and navigate to directory
