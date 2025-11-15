@@ -465,7 +465,7 @@ fi
 
     # configure prefixes: https://zsh-abbr.olets.dev/prefixes.html
     ABBR_REGULAR_ABBREVIATION_SCALAR_PREFIXES=('sudo' 'watch')
-    ABBR_REGULAR_ABBREVIATION_GLOB_PREFIXES=()
+    # ABBR_REGULAR_ABBREVIATION_GLOB_PREFIXES=()
 
     # configure cursor placement: https://zsh-abbr.olets.dev/cursor-placement.html
     ABBR_SET_EXPANSION_CURSOR=1
