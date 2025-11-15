@@ -38,7 +38,7 @@ _rg_fzf() {
   if [ -z "$pattern" ]; then
     # No pattern: run rg for all files and let fzf handle filtering
     local selected_line
-    selected_line="$(rg --line-number --column --no-heading ${hidden_opt[@]} --color=always --smart-case '' "$search_dir" 2>/dev/null |
+    selected_line="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} --color=always --smart-case '' "$search_dir" 2>/dev/null |
       awk -F: -v maxw=60 '{
           # reassemble match (fields 4..NF)
           m = ""; for(i=4;i<=NF;i++) m = m (i==4 ? "" : ":") $i;
@@ -89,7 +89,7 @@ _rg_fzf() {
   # Content search: search inside files and open at match
   # Run rg and capture raw results (limit to 2 for performance)
   local raw_results
-  raw_results="$(rg --line-number --column --no-heading ${hidden_opt[@]} --color=never --smart-case --max-count=2 "$pattern" "$search_dir" 2>/dev/null | head -n 2)"
+  raw_results="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} --color=never --smart-case --max-count=2 "$pattern" "$search_dir" 2>/dev/null | head -n 2)"
 
   if [ -z "$raw_results" ]; then
     _err "$command_name: no matches found for pattern."
@@ -114,7 +114,7 @@ _rg_fzf() {
   #   | fzf --height=40% --reverse --delimiter ':')"
 
   # fancy formatting with columns
-  selected_line="$(rg --line-number --column --no-heading ${hidden_opt[@]} --color=always --smart-case "$pattern" "$search_dir" 2>/dev/null |
+  selected_line="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} --color=always --smart-case "$pattern" "$search_dir" 2>/dev/null |
     awk -F: -v maxw=60 '{
           # reassemble match (fields 4..NF)
           m = ""; for(i=4;i<=NF;i++) m = m (i==4 ? "" : ":") $i;
