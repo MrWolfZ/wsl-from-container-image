@@ -510,6 +510,7 @@ fi
     # prefer VS Code if available, otherwise fallback to micro (set earlier in this file)
     (( $+commands[code] )) && export EDITOR='code'
     (( $+commands[code] )) && export GIT_EDITOR="code --wait"
+    (( $+commands[code] )) && export KUBE_EDITOR="code --wait"
 
   # git configuration reminder
     # Check if git is properly configured and show reminder if not
