@@ -182,7 +182,8 @@ The shell includes a set of powerful search functions that combine modern CLI to
 - Functions with `a` suffix search hidden files/directories; for content search, also ignores .gitignore (passes `--hidden --no-ignore` to ripgrep)
 - Preview window shows file contents using bat with syntax highlighting (content search)
 - Preview window intelligently uses eza for directories and bat for files (filename search)
-- **History integration**: All `*c`, `*d`, and `*da` functions add their commands to zsh history with relative paths, allowing easy repetition via up-arrow or history search. Commands are properly quoted when paths contain spaces or special characters.
+- **History integration**: All `*c`, `*d`, and `*da` functions add their commands to zsh history, allowing easy repetition via up-arrow or history search. Commands are properly quoted when paths contain spaces or special characters.
+- **Path resolution**: Content search functions (`r*`) return absolute paths resolved from the search directory, ensuring editor commands work correctly regardless of current directory.
 
 ### Powerlevel10k Git Commit Segments
 

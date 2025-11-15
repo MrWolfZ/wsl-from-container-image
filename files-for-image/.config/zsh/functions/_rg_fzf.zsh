@@ -82,6 +82,15 @@ _rg_fzf() {
       return $ret
     fi
 
+    # Convert relative path to absolute
+    local file_path="${selected_line%%:*}"
+    local rest_of_line="${selected_line#*:}"
+    if [[ "$file_path" != /* ]]; then
+      file_path="$search_dir/$file_path"
+    fi
+    file_path="$(realpath "$file_path")"
+    selected_line="$file_path:$rest_of_line"
+
     REPLY="$selected_line"
     return 0
   fi
@@ -144,6 +153,15 @@ _rg_fzf() {
     REPLY=
     return $ret
   fi
+
+  # Convert relative path to absolute
+  local file_path="${selected_line%%:*}"
+  local rest_of_line="${selected_line#*:}"
+  if [[ "$file_path" != /* ]]; then
+    file_path="$search_dir/$file_path"
+  fi
+  file_path="$(realpath "$file_path")"
+  selected_line="$file_path:$rest_of_line"
 
   REPLY="$selected_line"
   return $?
