@@ -181,7 +181,7 @@ The shell includes a set of powerful search functions that combine modern CLI to
 - `*c` functions intelligently detect VS Code Server availability and fall back to `$EDITOR` if not present
 - `nc` and `nca` functions reuse the current VS Code window only for files; directories open in a new window
 - Functions with `a` suffix search hidden files/directories; for content search, also ignores .gitignore (passes `--hidden --no-ignore` to ripgrep)
-- **Content search preview**: Shows 10 lines of context (±10 lines) around matched line using bat with syntax highlighting, line numbers, and highlight on the matched line. Preview appears at the bottom of the fzf window (60% height).
+- **Content search preview**: Shows 10 lines of context (±10 lines) around matched line using bat with syntax highlighting, line numbers, and highlight on the matched line. Preview appears at the bottom of the fzf window (fixed height of 23 lines).
 - **Filename search preview**: Intelligently uses eza for directories and bat for files
 - **History integration**: All `*c`, `*d`, and `*da` functions add their commands to zsh history, allowing easy repetition via up-arrow or history search. Commands are properly quoted when paths contain spaces or special characters.
 - **Path resolution**: Content search functions (`r*`) return absolute paths resolved from the search directory, ensuring editor commands work correctly regardless of current directory.

@@ -105,7 +105,7 @@ _rg_fzf() {
         }' |
       fzf --delimiter=$'\t' --with-nth=1,2 --nth=2 ${fzf_multi_opt[@]} \
         --preview='line=$(echo {3} | cut -d: -f2); file=$(echo {3} | cut -d: -f1); bat --style=numbers --color=always --paging=never --highlight-line "$line" --line-range $((line > 10 ? line - 10 : 1)):$((line + 10)) "$file" 2>/dev/null || echo "Preview unavailable"' \
-        --preview-window='down:60%:wrap')"
+        --preview-window='down:23:wrap')"
 
     local ret=$?
 
@@ -184,7 +184,7 @@ _rg_fzf() {
         }' |
     fzf --delimiter=$'\t' --with-nth=1,2 --nth=2 --query="$pattern" ${fzf_multi_opt[@]} \
       --preview='line=$(echo {3} | cut -d: -f2); file=$(echo {3} | cut -d: -f1); bat --style=numbers --color=always --paging=never --highlight-line "$line" --line-range $((line > 10 ? line - 10 : 1)):$((line + 10)) "$file" 2>/dev/null || echo "Preview unavailable"' \
-      --preview-window='down:60%:wrap')"
+      --preview-window='down:23:wrap')"
 
   local ret=$?
 
