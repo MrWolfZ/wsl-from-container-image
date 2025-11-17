@@ -45,6 +45,9 @@ _rg_fzf() {
   local pattern="$1"
   local search_dir="${2:-.}"
 
+  # Convert search_dir to absolute path to avoid path resolution issues
+  search_dir="$(realpath "$search_dir")"
+
   local -a hidden_opt=()
   if $include_hidden; then
     hidden_opt=(--hidden --no-ignore)
