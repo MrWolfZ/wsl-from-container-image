@@ -88,7 +88,7 @@ _rg_fzf() {
   # Run rg with awk formatting and fzf
   local selected_lines
   selected_lines="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} ${rg_color_opts[@]} --smart-case -- "${pattern:-}" "$search_dir" 2>/dev/null |
-    awk -F: -v maxw=60 -v search_dir="$search_dir" '{
+    awk -F: -v maxw=80 -v search_dir="$search_dir" '{
           # reassemble match (fields 4..NF)
           m = ""; for(i=4;i<=NF;i++) m = m (i==4 ? "" : ":") $i;
 
