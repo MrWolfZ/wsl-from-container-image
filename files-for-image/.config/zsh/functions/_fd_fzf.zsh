@@ -54,8 +54,8 @@ _fd_fzf() {
   fi
 
   local selection
-  selection="$(fd $hidden_opt $no_ignore_opt --absolute-path --color=always -- . "$search_dir" |
-    fzf $fzf_query --preview 'if [ -d {} ]; then eza --color=always --icons=always --group-directories-first --long --all --git {}; else bat --color=always --style=numbers,changes --line-range :500 {}; fi')"
+  selection="$(fd --base-directory "$search_dir" $hidden_opt $no_ignore_opt --color=always -- . |
+    fzf $fzf_query --preview 'if [ -d '"$search_dir"'/{} ]; then eza --color=always --icons=always --group-directories-first --long --all --git '"$search_dir"'/{}; else bat --color=always --style=numbers,changes --line-range :500 '"$search_dir"'/{}; fi')"
 
   local ret=$?
 
@@ -65,6 +65,7 @@ _fd_fzf() {
     return $ret
   fi
 
-  REPLY="$selection"
+  # Convert relative path to absolute
+  REPLY="$(realpath "$search_dir/$selection")"
   return 0
 }

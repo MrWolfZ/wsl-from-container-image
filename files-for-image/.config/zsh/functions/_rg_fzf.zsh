@@ -76,11 +76,18 @@ _rg_fzf() {
     # No pattern: run rg for all files and let fzf handle filtering
     local selected_lines
     selected_lines="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} ${rg_color_opts[@]} --smart-case '' "$search_dir" 2>/dev/null |
-      awk -F: -v maxw=60 '{
+      awk -F: -v maxw=60 -v search_dir="$search_dir" '{
           # reassemble match (fields 4..NF)
           m = ""; for(i=4;i<=NF;i++) m = m (i==4 ? "" : ":") $i;
 
+          # Strip search_dir prefix to get relative path (keeps ANSI codes)
           f = $1
+          # Escape special regex characters in search_dir
+          escaped_dir = search_dir
+          gsub(/[[\\.^$*+?{}()|]/, "\\\\&", escaped_dir)
+          # Replace "search_dir/" with "" (only first occurrence)
+          sub(escaped_dir "/", "", f)
+
           # middle truncate if longer than maxw
           if (length(f) > maxw) {
             pre = int(maxw/2) - 1
@@ -155,11 +162,18 @@ _rg_fzf() {
 
   # fancy formatting with columns
   selected_lines="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} ${rg_color_opts[@]} --smart-case -- "$pattern" "$search_dir" 2>/dev/null |
-    awk -F: -v maxw=60 '{
+    awk -F: -v maxw=60 -v search_dir="$search_dir" '{
           # reassemble match (fields 4..NF)
           m = ""; for(i=4;i<=NF;i++) m = m (i==4 ? "" : ":") $i;
 
+          # Strip search_dir prefix to get relative path (keeps ANSI codes)
           f = $1
+          # Escape special regex characters in search_dir
+          escaped_dir = search_dir
+          gsub(/[[\\.^$*+?{}()|]/, "\\\\&", escaped_dir)
+          # Replace "search_dir/" with "" (only first occurrence)
+          sub(escaped_dir "/", "", f)
+
           # middle truncate if longer than maxw
           if (length(f) > maxw) {
             pre = int(maxw/2) - 1
