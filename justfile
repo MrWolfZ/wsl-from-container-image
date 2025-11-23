@@ -106,6 +106,10 @@ k3s_version_arg := " --build-arg K3S_VERSION=" + k3s_version
 kubebuilder_version := "v4.9.0"
 kubebuilder_version_arg := " --build-arg KUBEBUILDER_VERSION=" + kubebuilder_version
 
+# https://github.com/kubernetes-sigs/kustomize/tags
+kustomize_version := "v5.8.0"
+kustomize_version_arg := " --build-arg KUSTOMIZE_VERSION=" + kustomize_version
+
 # https://github.com/hashicorp/vault/tags
 vault_version := "1.20.4"
 vault_version_arg := " --build-arg VAULT_VERSION=" + vault_version
@@ -216,6 +220,7 @@ dev_build_args := (
   + kind_version_arg
   + k3s_version_arg
   + kubebuilder_version_arg
+  + kustomize_version_arg
   + vault_version_arg
   + kubeseal_version_arg
   + mc_version_arg

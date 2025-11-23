@@ -476,6 +476,19 @@ RUN curl -fLo kubebuilder "https://github.com/kubernetes-sigs/kubebuilder/releas
     mv ./kubebuilder "$HOME/.local/bin/kubebuilder" && \
     "$HOME/.local/bin/kubebuilder" completion zsh > "$HOME/.config/zsh/completions/_kubebuilder"
 
+FROM base as base-kustomize
+
+ARG KUSTOMIZE_VERSION
+RUN curl -fLO "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" && \
+    curl -fLO "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/checksums.txt" && \
+    sha256sum --check --ignore-missing checksums.txt && rm checksums.txt && \
+    mkdir kustomize && \
+    tar xzf kustomize*.tar.gz -C ./kustomize && \
+    mv ./kustomize/kustomize "$HOME/.local/bin/kustomize" && \
+    rm kustomize*.tar.gz && \
+    rm -rf kustomize && \
+    "$HOME/.local/bin/kustomize" completion zsh > "$HOME/.config/zsh/completions/_kustomize"
+
 FROM base as base-vault
 
 ARG VAULT_VERSION
@@ -606,6 +619,10 @@ RUN PATH="$HOME/.local/bin:$PATH" k3s --version
 COPY --from=base-kubebuilder --chown=root:root /home/dev/.local/bin/kubebuilder /home/dev/.local/bin/
 COPY --from=base-kubebuilder --chown=root:root /home/dev/.config/zsh/completions/* /home/dev/.config/zsh/completions/
 RUN PATH="$HOME/.local/bin:$PATH" kubebuilder version
+
+COPY --from=base-kustomize --chown=root:root /home/dev/.local/bin/kustomize /home/dev/.local/bin/
+COPY --from=base-kustomize --chown=root:root /home/dev/.config/zsh/completions/* /home/dev/.config/zsh/completions/
+RUN PATH="$HOME/.local/bin:$PATH" kustomize version
 
 COPY --from=base-vault --chown=root:root /home/dev/.local/bin/vault /home/dev/.local/bin/
 COPY --from=base-vault --chown=root:root /home/dev/.config/zsh/bash_completions/* /home/dev/.config/zsh/bash_completions/
