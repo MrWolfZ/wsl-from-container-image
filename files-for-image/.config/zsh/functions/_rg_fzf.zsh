@@ -71,97 +71,23 @@ _rg_fzf() {
     fzf_multi_opt=(--multi)
   fi
 
-  # If pattern is empty, skip initial match check and go straight to fzf
-  if [ -z "$pattern" ]; then
-    # No pattern: run rg for all files and let fzf handle filtering
-    local selected_lines
-    selected_lines="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} ${rg_color_opts[@]} --smart-case '' "$search_dir" 2>/dev/null |
-      awk -F: -v maxw=60 -v search_dir="$search_dir" '{
-          # reassemble match (fields 4..NF)
-          m = ""; for(i=4;i<=NF;i++) m = m (i==4 ? "" : ":") $i;
-
-          # Strip search_dir prefix to get relative path (keeps ANSI codes)
-          f = $1
-          # Escape special regex characters in search_dir
-          escaped_dir = search_dir
-          gsub(/[[\\.^$*+?{}()|]/, "\\\\&", escaped_dir)
-          # Replace "search_dir/" with "" (only first occurrence)
-          sub(escaped_dir "/", "", f)
-
-          # middle truncate if longer than maxw
-          if (length(f) > maxw) {
-            pre = int(maxw/2) - 1
-            suf = maxw - pre - 3   # 3 dots "..."
-            f = substr(f, 1, pre) "..." substr(f, length(f)-suf+1)
-          }
-
-          # Calculate padding accounting for ANSI color codes
-          line_colored = $2
-          col_colored = $3
-
-          # Strip ANSI to get visible length
-          line_plain = line_colored
-          col_plain = col_colored
-          gsub(/\033\[[0-9;]*m/, "", line_plain)
-          gsub(/\033\[[0-9;]*m/, "", col_plain)
-
-          # Total width = desired visible width + ANSI overhead
-          line_width = 6 + (length(line_colored) - length(line_plain))
-          col_width = 4 + (length(col_colored) - length(col_plain))
-
-          # Output: metadata\tcontent\toriginal_line
-          # Metadata is displayed but not searched; content is both displayed and searched
-          printf "%-*s %*s %*s\t%s\t%s\n", maxw, f, line_width, line_colored, col_width, col_colored, m, $0
-        }' |
-      fzf --delimiter=$'\t' --with-nth=1,2 --nth=2 ${fzf_multi_opt[@]} \
-        --preview='line=$(echo {3} | cut -d: -f2); file=$(echo {3} | cut -d: -f1); bat --style=numbers --color=always --paging=never --highlight-line "$line" --line-range $((line > 10 ? line - 10 : 1)):$((line + 10)) "$file" 2>/dev/null || echo "Preview unavailable"' \
-        --preview-window='down:23:wrap')"
-
-    local ret=$?
-
-    # if user cancelled fzf
-    if [ "$ret" -ne 0 ]; then
-      REPLY=
-      return $ret
+  # If pattern is provided, check for matches first
+  if [ -n "$pattern" ]; then
+    if ! rg --follow --line-number --column --no-heading ${hidden_opt[@]} --color=never --smart-case --max-count=1 -- "$pattern" "$search_dir" &>/dev/null; then
+      _err "$command_name: no matches found for pattern."
+      return 3
     fi
-
-    # Process selected lines (could be one or multiple)
-    local -a processed_lines=()
-    while IFS= read -r line; do
-      # extract the original rg line (field 3)
-      line="${line##*$'\t'}"
-
-      # Convert relative path to absolute
-      local file_path="${line%%:*}"
-      local rest_of_line="${line#*:}"
-      if [[ "$file_path" != /* ]]; then
-        file_path="$search_dir/$file_path"
-      fi
-      file_path="$(realpath "$file_path")"
-      processed_lines+=("$file_path:$rest_of_line")
-    done <<< "$selected_lines"
-
-    # Join with newlines
-    REPLY="${(F)processed_lines}"
-    return 0
   fi
 
-  # Content search: search inside files and open at match
-  # Quick check to see if there are any results
-  if ! rg --follow --line-number --column --no-heading ${hidden_opt[@]} --color=never --smart-case --max-count=1 -- "$pattern" "$search_dir" &>/dev/null; then
-    _err "$command_name: no matches found for pattern."
-    return 3
+  # Build fzf query option
+  local -a fzf_query_opt=()
+  if [ -n "$pattern" ]; then
+    fzf_query_opt=(--query="$pattern")
   fi
 
-  # Run rg again with color and format for fzf
+  # Run rg with awk formatting and fzf
   local selected_lines
-
-  # simple list without formatting if you prefer
-  # selected_lines="$(rg --line-number --column --no-heading ${hidden_opt[@]} --smart-case -- "$pattern" "$search_dir" \
-  #   | fzf --height=40% --reverse --delimiter ':')"
-
-  # fancy formatting with columns
-  selected_lines="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} ${rg_color_opts[@]} --smart-case -- "$pattern" "$search_dir" 2>/dev/null |
+  selected_lines="$(rg --follow --line-number --column --no-heading ${hidden_opt[@]} ${rg_color_opts[@]} --smart-case -- "${pattern:-}" "$search_dir" 2>/dev/null |
     awk -F: -v maxw=60 -v search_dir="$search_dir" '{
           # reassemble match (fields 4..NF)
           m = ""; for(i=4;i<=NF;i++) m = m (i==4 ? "" : ":") $i;
@@ -199,7 +125,7 @@ _rg_fzf() {
           # Metadata is displayed but not searched; content is both displayed and searched
           printf "%-*s %*s %*s\t%s\t%s\n", maxw, f, line_width, line_colored, col_width, col_colored, m, $0
         }' |
-    fzf --delimiter=$'\t' --with-nth=1,2 --nth=2 --query="$pattern" ${fzf_multi_opt[@]} \
+    fzf --delimiter=$'\t' --with-nth=1,2 --nth=2 ${fzf_query_opt[@]} ${fzf_multi_opt[@]} \
       --preview='line=$(echo {3} | cut -d: -f2); file=$(echo {3} | cut -d: -f1); bat --style=numbers --color=always --paging=never --highlight-line "$line" --line-range $((line > 10 ? line - 10 : 1)):$((line + 10)) "$file" 2>/dev/null || echo "Preview unavailable"' \
       --preview-window='down:23:wrap')"
 
@@ -229,5 +155,5 @@ _rg_fzf() {
 
   # Join with newlines
   REPLY="${(F)processed_lines}"
-  return $?
+  return 0
 }
