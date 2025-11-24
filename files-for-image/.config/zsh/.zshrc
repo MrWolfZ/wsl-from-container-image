@@ -93,6 +93,11 @@ fi
   # test colors with
   # echo "${COLOR_BLACK}COLOR_BLACK\n${COLOR_DARK_GRAY}COLOR_DARK_GRAY\n${COLOR_RED}COLOR_RED\n${COLOR_LIGHT_RED}COLOR_LIGHT_RED\n${COLOR_GREEN}COLOR_GREEN\n${COLOR_LIGHT_GREEN}COLOR_LIGHT_GREEN\n${COLOR_YELLOW}COLOR_YELLOW\n${COLOR_BRIGHT_YELLOW}COLOR_BRIGHT_YELLOW\n${COLOR_BLUE}COLOR_BLUE\n${COLOR_LIGHT_BLUE}COLOR_LIGHT_BLUE\n${COLOR_PURPLE}COLOR_PURPLE\n${COLOR_MAGENTA}COLOR_MAGENTA\n${COLOR_DARK_CYAN}COLOR_DARK_CYAN\n${COLOR_CYAN}COLOR_CYAN\n${COLOR_LIGHT_GRAY}COLOR_LIGHT_GRAY\n${COLOR_WHITE}COLOR_WHITE\n${COLOR_RESET}COLOR_RESET"
 
+  # see here for reference: https://vitormv.github.io/fzf-themes/
+  FZF_COLORS="--color=fg:#fcfcfc,hl:#f40c42,hl+:#f40c42,info:#ffca58,prompt:#ffca58,pointer:#ffca58,marker:#ffca58,spinner:#369cea,header:#369cea"
+  export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --no-hscroll --no-mouse --ansi $FZF_COLORS"
+  export FZF_CTRL_R_OPTS="$FZF_DEFAULT_OPTS"
+
 # --------- Source Antidote ----------
   # we need to set the zstyle before loading the ez-compinit plugin
   # Available completion styles: gremlin, ohmy, prez, zshzoo
@@ -122,7 +127,7 @@ fi
   zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --all --long --group-directories-first --icons=always --color=always $realpath'
 
   # fzf-tab: full-height interface with reverse layout, border, and case-insensitive search
-  zstyle ':fzf-tab:*' fzf-flags --height=100% --layout=reverse --border -i
+  zstyle ':fzf-tab:*' fzf-flags $=FZF_DEFAULT_OPTS -i
 
   # fzf-tab: switch between completion groups using '<' and '>'
   zstyle ':fzf-tab:*' switch-group '<' '>'
@@ -370,11 +375,6 @@ fi
     export USE_GKE_GCLOUD_AUTH_PLUGIN='True'
 
   # set up navigation and search functionality
-    # see here for reference: https://vitormv.github.io/fzf-themes/
-		FZF_COLORS="--color=fg:#fcfcfc,hl:#f40c42,hl+:#f40c42,info:#ffca58,prompt:#ffca58,pointer:#ffca58,marker:#ffca58,spinner:#369cea,header:#369cea"
-    export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --no-hscroll --no-mouse --ansi $FZF_COLORS"
-    export FZF_CTRL_R_OPTS="$FZF_DEFAULT_OPTS"
-
     # set up fzf key bindings
     source "$ZDOTDIR/fzf.zsh"
 
