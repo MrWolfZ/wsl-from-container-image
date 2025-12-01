@@ -516,6 +516,10 @@ fi
     # the most beautiful command to ever exist
     alias git-delete-untracked-branches="git fetch -p && for branch in \$(git for-each-ref --format '%(refname) %(upstream:track)' refs/heads | awk '\$2 == \"[gone]\" {sub(\"refs/heads/\", \"\", \$1); print \$1}'); do git branch -D \$branch; done"
 
+		# the default python installation does not work, so we alias python to use the python install from a venv or fall back to uv
+		alias python='[[ -n "${VIRTUAL_ENV:-}" ]] && "${VIRTUAL_ENV}/bin/python" || uv run python'
+		alias python3='[[ -n "${VIRTUAL_ENV:-}" ]] && "${VIRTUAL_ENV}/bin/python3" || uv run python3'
+
   # final configuration tweaks
     # prefer VS Code if available, otherwise fallback to micro (set earlier in this file)
     (( $+commands[code] )) && export EDITOR='code'
