@@ -80,7 +80,7 @@ keybinding:
     gotoBottom: <end>
     gotoTop-alt: <disabled>
     gotoBottom-alt: <disabled>
-    toggleRangeSelect: v
+    toggleRangeSelect: L
     rangeSelectDown: <s-down>
     rangeSelectUp: <s-up>
     prevBlock: '('
@@ -95,7 +95,7 @@ keybinding:
       - '5'
       - '6'
       - '2'
-    focusMainView: <backtab>
+    focusMainView: '3'
     nextMatch: 'n'
     prevMatch: 'N'
     startSearch: /
@@ -122,7 +122,7 @@ keybinding:
     createRebaseOptionsMenu: m
     pushFiles: p
     pullFiles: u
-    refresh: R
+    refresh: r
     createPatchOptionsMenu: <c-p>
     nextTab: '}'
     prevTab: '{'
@@ -150,15 +150,15 @@ keybinding:
   files:
     commitChanges: c
     commitChangesWithoutHook: w
-    amendLastCommit: A
+    amendLastCommit: a
     commitChangesWithEditor: C
     findBaseCommitForFixup: <c-f>
-    confirmDiscard: x
+    confirmDiscard: d
     ignoreFile: i
     refreshFiles: r
     stashAllChanges: s
     viewStashOptions: S
-    toggleStagedAll: a
+    toggleStagedAll: <backtab>
     viewResetOptions: D
     fetch: f
     toggleTreeView: '`'
@@ -175,12 +175,12 @@ keybinding:
     forceCheckoutBranch: F
     checkoutPreviousBranch: '-'
     rebaseBranch: r
-    renameBranch: R
+    renameBranch: <f2>
     mergeIntoCurrentBranch: M
     moveCommitsToNewBranch: 'N'
     viewGitFlowOptions: i
     fastForward: f
-    createTag: T
+    createTag: t
     pushTag: P
     setUpstream: U
     fetchRemote: f
@@ -189,20 +189,20 @@ keybinding:
     viewWorktreeOptions: w
   commits:
     squashDown: s
-    renameCommit: r
-    renameCommitWithEditor: R
+    renameCommit: <f2>
+    renameCommitWithEditor: <disabled>
     viewResetOptions: g
     markCommitAsFixup: f
     createFixupCommit: F
     squashAboveCommits: S
     moveDownCommit: D
     moveUpCommit: U
-    amendToCommit: A
-    resetCommitAuthor: a
+    amendToCommit: a
+    resetCommitAuthor: A
     pickCommit: p
     revertCommit: t
-    cherryPickCopy: C
-    pasteCommits: V
+    cherryPickCopy: c
+    pasteCommits: v
     markCommitAsBaseForRebase: B
     tagCommit: T
     checkoutCommit: <tab>
@@ -219,11 +219,11 @@ keybinding:
     addCoAuthor: c
   stash:
     popStash: g
-    renameStash: r
+    renameStash: <f2>
   commitFiles:
     checkoutCommitFile: c
   main:
-    toggleSelectHunk: a
+    toggleSelectHunk: l
     pickBothHunks: b
     editSelectHunk: E
   submodules:
