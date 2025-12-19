@@ -74,6 +74,10 @@ podman_tui_version_arg := " --build-arg PODMAN_TUI_VERSION=" + podman_tui_versio
 just_version := "1.43.0"
 just_version_arg := " --build-arg JUST_VERSION=" + just_version
 
+# https://github.com/go-task/task/tags
+taskfile_version := "1.43.0"
+taskfile_version_arg := " --build-arg TASKFILE_VERSION=" + taskfile_version
+
 # https://github.com/kubernetes/kubernetes/tags
 kubectl_version := "v1.34.1"
 kubectl_version_arg := " --build-arg KUBECTL_VERSION=" + kubectl_version
@@ -216,6 +220,7 @@ dev_build_args := (
   + lazydocker_version_arg
   + podman_tui_version_arg
   + just_version_arg
+  + taskfile_version_arg
   + kubectl_version_arg
   + helm_version_arg
   + kubelogin_version_arg

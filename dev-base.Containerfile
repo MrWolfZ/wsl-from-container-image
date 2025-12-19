@@ -372,6 +372,20 @@ RUN echo "changeme" | sudo -S mkdir -p /usr/local/share/man/man1/ && \
     rm just*.tar.gz && \
     rm -rf just
 
+FROM base as base-taskfile
+
+ARG TASKFILE_VERSION
+RUN echo "taskfile version to install: ${TASKFILE_VERSION}" && \
+    curl -fsSLO "https://github.com/go-task/task/releases/download/${TASKFILE_VERSION}/task_linux_amd64.tar.gz" && \
+    curl -fsSLO "https://github.com/go-task/task/releases/download/${TASKFILE_VERSION}/task_checksums.txt" && \
+    sha256sum --check --ignore-missing task_checksums.txt && rm task_checksums.txt && \
+    mkdir task && \
+    tar xzf task_linux_amd64.tar.gz -C ./task && \
+    mv ./task/task "$HOME/.local/bin/" && \
+    mv ./task/completion/zsh/_task "$HOME/.config/zsh/completions/_task" && \
+    rm task_linux_amd64.tar.gz && \
+    rm -rf task
+
 FROM base as base-kubectl
 
 ARG KUBECTL_VERSION
@@ -577,6 +591,10 @@ COPY --from=base-just --chown=root:root /home/dev/.local/bin/just /home/dev/.loc
 COPY --from=base-just --chown=root:root /home/dev/.config/zsh/completions/* /home/dev/.config/zsh/completions/
 COPY --from=base-just --chown=root:root /usr/local/share/man/man1/just.1 /usr/local/share/man/man1/
 RUN PATH="$HOME/.local/bin:$PATH" just --version
+
+COPY --from=base-taskfile --chown=root:root /home/dev/.local/bin/task /home/dev/.local/bin/
+COPY --from=base-taskfile --chown=root:root /home/dev/.config/zsh/completions/* /home/dev/.config/zsh/completions/
+RUN PATH="$HOME/.local/bin:$PATH" task --version
 
 COPY --from=base-kubectl --chown=root:root /home/dev/.local/bin/kubectl /home/dev/.local/bin/
 COPY --from=base-kubectl --chown=root:root /home/dev/.config/zsh/completions/* /home/dev/.config/zsh/completions/
