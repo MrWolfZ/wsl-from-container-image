@@ -125,19 +125,20 @@ RUN curl -fLO "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/u
 FROM base as base-node
 
 ARG FNM_VERSION
-RUN curl -fLO "https://github.com/Schniz/fnm/releases/download/${FNM_VERSION}/fnm-linux.zip" && \
+ARG NODE_VERSION
+RUN echo "fnm version to install: ${FNM_VERSION}" && \
+    echo "node version to install: ${NODE_VERSION}" && \
+    curl -fsSLO "https://github.com/Schniz/fnm/releases/download/${FNM_VERSION}/fnm-linux.zip" && \
     unzip fnm-linux.zip && \
     rm fnm-linux.zip && \
     mv fnm "$HOME/.local/bin/" && \
     "$HOME/.local/bin/fnm" completions --shell zsh > "$HOME/.config/zsh/completions/_fnm" && \
     export PATH="$HOME/.local/bin:$PATH" && \
-    eval "$(fnm env --use-on-cd)" && \
-    fnm install --lts && \
-    fnm install --latest && \
-    fnm default latest && \
+    eval "$(fnm env)" && \
+    fnm install ${NODE_VERSION} && \
+    fnm default ${NODE_VERSION} && \
     printf '#compdef npm\n_npm_completion() {\n  local si=$IFS\n  compadd -- $(COMP_CWORD=$((CURRENT-1)) COMP_LINE=$BUFFER COMP_POINT=0 npm completion -- "${words[@]}" 2>/dev/null)\n  IFS=$si\n}\ncompdef _npm_completion npm\n' > "$HOME/.config/zsh/completions/_npm" && \
-    curl -fLo "$HOME/.config/zsh/completions/_node" "https://raw.githubusercontent.com/zsh-users/zsh-completions/master/src/_node" && \
-    echo "changeme" | sudo -S rm -rf /tmp/*
+    curl -fsSLo "$HOME/.config/zsh/completions/_node" "https://raw.githubusercontent.com/zsh-users/zsh-completions/master/src/_node"
 
 FROM base-golang as base-containernetworking
 

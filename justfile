@@ -26,6 +26,10 @@ python_version_arg := " --build-arg PYTHON_VERSION=" + python_version
 fnm_version := "v1.38.1"
 fnm_version_arg := " --build-arg FNM_VERSION=" + fnm_version
 
+# https://nodejs.org/en/about/previous-releases
+node_version := "24"
+node_version_arg := " --build-arg NODE_VERSION=" + node_version
+
 # https://github.com/containernetworking/plugins/tags
 containernetworking_version := "v1.8.0"
 containernetworking_version_arg := " --build-arg CONTAINERNETWORKING_VERSION=" + containernetworking_version
@@ -200,6 +204,7 @@ dev_build_args := (
   + uv_version_arg
   + python_version_arg
   + fnm_version_arg
+  + node_version_arg
   + containernetworking_version_arg
   + slirp4netns_version_arg
   + conmon_version_arg
