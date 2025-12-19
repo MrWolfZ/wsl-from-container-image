@@ -454,6 +454,6 @@ build-agent-claude-code: build-agent-base-image
   -f .tools/claude-code.Containerfile \
   -t wsl-agent-claude-code:latest \
   --build-arg USER_NAME=${CURRENT_USER} \
-  --build-arg TOOL_VERSION=2.0.8 \
+  --build-arg TOOL_VERSION=2.0.59 \
   .image-build
   rm -rf .image-build
