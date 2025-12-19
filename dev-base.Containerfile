@@ -19,6 +19,7 @@ RUN apt-get update && \
     libseccomp-dev \
     libselinux1-dev \
     libslirp-dev \
+    libssl-dev \
     libsystemd-dev \
     libtool \
     libyajl-dev \
@@ -88,31 +89,43 @@ FROM base as base-golang
 
 # install tools for go development (rename go dir to golang to work around `make` issue when a `go` dir is in path)
 ARG GO_VERSION
-RUN curl -fLO "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" && \
+RUN echo "golang version to install: ${GO_VERSION}" && \
+    curl -fsSLO "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" && \
     tar -C . -xf go${GO_VERSION}.linux-amd64.tar.gz && \
     rm go${GO_VERSION}.linux-amd64.tar.gz && \
     mv go "$HOME/.golang" && \
     "$HOME/.golang/bin/go" version
 
+USER root
+RUN chown -R root:root "$HOME/.golang/bin"
+
 FROM base as base-rust
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path && \
+ARG RUST_VERSION
+RUN echo "rust version to install: ${RUST_VERSION}" && \
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain=${RUST_VERSION} -y --profile minimal --no-modify-path && \
     "$HOME/.cargo/bin/rustup" -v component add rustfmt && \
     "$HOME/.cargo/bin/rustup" -v component add clippy && \
     "$HOME/.cargo/bin/rustup" -v target add x86_64-unknown-linux-musl && \
     "$HOME/.cargo/bin/rustup" -v target add aarch64-unknown-linux-musl && \
+    "$HOME/.cargo/bin/rustup" -v component add rust-src && \
     "$HOME/.cargo/bin/rustup" -v completions zsh > ~/.config/zsh/completions/_rustup && \
     "$HOME/.cargo/bin/rustup" -v completions zsh cargo > ~/.config/zsh/completions/_cargo && \
     "$HOME/.cargo/bin/rustup" -v --version && \
     "$HOME/.cargo/bin/cargo" --version
+
+USER root
+RUN chown -R root:root "$HOME/.cargo/bin" && chown -R root:root "$HOME/.rustup/toolchains"
 
 FROM base as base-python
 
 # install tools for python development
 ARG UV_VERSION
 ARG PYTHON_VERSION
-RUN curl -fLO "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-musl.tar.gz" && \
-    curl -fLO "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-musl.tar.gz.sha256" && \
+RUN echo "UV version to install: ${UV_VERSION}" && \
+    echo "python version to install: ${PYTHON_VERSION}" && \
+    curl -fsSLO "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-musl.tar.gz" && \
+    curl -fsSLO "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-musl.tar.gz.sha256" && \
     sha256sum --check uv*.sha256 && rm uv*.sha256 && \
     mkdir uv && \
     tar -C uv -xf uv*.tar.gz && \
@@ -250,8 +263,8 @@ RUN export PATH="$HOME/.local/bin:$PATH" && \
     uv venv && \
     source .venv/bin/activate && \
     uv pip install pyinstaller && \
-    curl -fLO https://raw.githubusercontent.com/containers/podman-compose/main/requirements.txt && \
-    curl -fLO https://raw.githubusercontent.com/containers/podman-compose/main/podman_compose.py && \
+    curl -fsSLO https://raw.githubusercontent.com/containers/podman-compose/main/requirements.txt && \
+    curl -fsSLO https://raw.githubusercontent.com/containers/podman-compose/main/podman_compose.py && \
     uv pip install -r requirements.txt && \
     pyinstaller --onefile --clean podman_compose.py && \
     cp dist/podman_compose "$HOME/.local/bin/podman-compose" && \
@@ -277,8 +290,8 @@ RUN cd "$HOME/src" && \
 FROM base as base-lazydocker
 
 ARG LAZYDOCKER_VERSION
-RUN curl -fLO "https://github.com/jesseduffield/lazydocker/releases/download/${LAZYDOCKER_VERSION}/lazydocker_${LAZYDOCKER_VERSION#v}_Linux_x86_64.tar.gz" && \
-    curl -fLO "https://github.com/jesseduffield/lazydocker/releases/download/${LAZYDOCKER_VERSION}/checksums.txt" && \
+RUN curl -fsSLO "https://github.com/jesseduffield/lazydocker/releases/download/${LAZYDOCKER_VERSION}/lazydocker_${LAZYDOCKER_VERSION#v}_Linux_x86_64.tar.gz" && \
+    curl -fsSLO "https://github.com/jesseduffield/lazydocker/releases/download/${LAZYDOCKER_VERSION}/checksums.txt" && \
     sha256sum --check --ignore-missing checksums.txt && rm checksums.txt && \
     mkdir lazydocker && \
     tar xzf lazydocker*.tar.gz -C ./lazydocker && \
@@ -290,8 +303,8 @@ RUN curl -fLO "https://github.com/jesseduffield/lazydocker/releases/download/${L
 FROM base as base-podman-tui
 
 ARG PODMAN_TUI_VERSION
-RUN curl -fLO "https://github.com/containers/podman-tui/releases/download/${PODMAN_TUI_VERSION}/podman-tui-release-linux_amd64.zip" && \
-    curl -fLO "https://github.com/containers/podman-tui/releases/download/${PODMAN_TUI_VERSION}/sha256sum" && \
+RUN curl -fsSLO "https://github.com/containers/podman-tui/releases/download/${PODMAN_TUI_VERSION}/podman-tui-release-linux_amd64.zip" && \
+    curl -fsSLO "https://github.com/containers/podman-tui/releases/download/${PODMAN_TUI_VERSION}/sha256sum" && \
     sha256sum --check --ignore-missing sha256sum && rm sha256sum && \
     unzip podman-tui*.zip -d ./podman-tui && \
     mv ./podman-tui/podman-tui*/podman-tui*/podman-tui "$HOME/.local/bin/" && \
@@ -360,9 +373,10 @@ COPY --chown=root:root etc/sysctl.conf.d/20-ipv4-forward.conf /etc/sysctl.conf.d
 FROM base as base-just
 
 ARG JUST_VERSION
-RUN echo "changeme" | sudo -S mkdir -p /usr/local/share/man/man1/ && \
-    curl -fLO "https://github.com/casey/just/releases/download/${JUST_VERSION}/just-${JUST_VERSION}-x86_64-unknown-linux-musl.tar.gz" && \
-    curl -fLO "https://github.com/casey/just/releases/download/${JUST_VERSION}/SHA256SUMS" && \
+RUN echo "just version to install: ${JUST_VERSION}" && \
+    echo "changeme" | sudo -S mkdir -p /usr/local/share/man/man1/ && \
+    curl -fsSLO "https://github.com/casey/just/releases/download/${JUST_VERSION}/just-${JUST_VERSION}-x86_64-unknown-linux-musl.tar.gz" && \
+    curl -fsSLO "https://github.com/casey/just/releases/download/${JUST_VERSION}/SHA256SUMS" && \
     sha256sum --check --ignore-missing SHA256SUMS && rm SHA256SUMS && \
     mkdir just && \
     tar xzf just*.tar.gz -C ./just && \
@@ -389,8 +403,9 @@ RUN echo "taskfile version to install: ${TASKFILE_VERSION}" && \
 FROM base as base-kubectl
 
 ARG KUBECTL_VERSION
-RUN curl -fLO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
-    curl -fLO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256" && \
+RUN echo "kubectl version to install: ${KUBECTL_VERSION}" && \
+    curl -fsSLO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
+    curl -fsSLO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256" && \
     echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check && rm kubectl.sha256 && \
     chmod +x kubectl && \
     mv ./kubectl "$HOME/.local/bin/kubectl" && \
@@ -398,24 +413,25 @@ RUN curl -fLO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kube
 
 FROM base as base-kubectx
 
-RUN curl -fLo "$HOME/.local/bin/kubectx" "https://raw.githubusercontent.com/ahmetb/kubectx/refs/heads/master/kubectx" && \
-    curl -fLo "$HOME/.local/bin/kubens" "https://raw.githubusercontent.com/ahmetb/kubectx/refs/heads/master/kubens" && \
+RUN curl -fsSLo "$HOME/.local/bin/kubectx" "https://raw.githubusercontent.com/ahmetb/kubectx/refs/heads/master/kubectx" && \
+    curl -fsSLo "$HOME/.local/bin/kubens" "https://raw.githubusercontent.com/ahmetb/kubectx/refs/heads/master/kubens" && \
     chmod +x "$HOME/.local/bin/kubectx" && \
     chmod +x "$HOME/.local/bin/kubens" && \
-    curl -fLo "$HOME/.config/zsh/completions/_kubectx" "https://raw.githubusercontent.com/ahmetb/kubectx/refs/heads/master/completion/_kubectx.zsh" && \
-    curl -fLo "$HOME/.config/zsh/completions/_kubens" "https://raw.githubusercontent.com/ahmetb/kubectx/refs/heads/master/completion/_kubens.zsh"
+    curl -fsSLo "$HOME/.config/zsh/completions/_kubectx" "https://raw.githubusercontent.com/ahmetb/kubectx/refs/heads/master/completion/_kubectx.zsh" && \
+    curl -fsSLo "$HOME/.config/zsh/completions/_kubens" "https://raw.githubusercontent.com/ahmetb/kubectx/refs/heads/master/completion/_kubens.zsh"
 
 FROM base as base-kubetail
 
-RUN curl -fLo "$HOME/.local/bin/kubetail" "https://github.com/johanhaleby/kubetail/raw/refs/heads/master/kubetail" && \
+RUN curl -fsSLo "$HOME/.local/bin/kubetail" "https://github.com/johanhaleby/kubetail/raw/refs/heads/master/kubetail" && \
     chmod +x "$HOME/.local/bin/kubetail" && \
-    curl -fLo "$HOME/.config/zsh/completions/_kubetail" "https://raw.githubusercontent.com/johanhaleby/kubetail/refs/heads/master/completion/kubetail.zsh"
+    curl -fsSLo "$HOME/.config/zsh/completions/_kubetail" "https://raw.githubusercontent.com/johanhaleby/kubetail/refs/heads/master/completion/kubetail.zsh"
 
 FROM base as base-helm
 
 ARG HELM_VERSION
-RUN curl -fLO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz" && \
-    curl -fLO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz.sha256sum" && \
+RUN echo "helm version to install: ${HELM_VERSION}" && \
+    curl -fsSLO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz" && \
+    curl -fsSLO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz.sha256sum" && \
     sha256sum --check helm*.sha256sum && rm helm*.sha256sum && \
     mkdir helm && \
     tar xzf helm*.tar.gz -C ./helm && \
@@ -427,8 +443,8 @@ RUN curl -fLO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz" && \
 FROM base as base-kubelogin
 
 ARG KUBELOGIN_VERSION
-RUN curl -fLO "https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip" && \
-    curl -fLO "https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip.sha256" && \
+RUN curl -fsSLO "https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip" && \
+    curl -fsSLO "https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip.sha256" && \
     cat kubelogin-linux-amd64.zip.sha256 | sha256sum --check && \
     rm kubelogin-linux-amd64.zip.sha256 && \
     unzip kubelogin-linux-amd64.zip -d ./kubelogin && \
@@ -440,7 +456,7 @@ RUN curl -fLO "https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_
 FROM base as base-clusterctl
 
 ARG CLUSTERCTL_VERSION
-RUN curl -fLo clusterctl "https://github.com/kubernetes-sigs/cluster-api/releases/download/${CLUSTERCTL_VERSION}/clusterctl-linux-amd64" && \
+RUN curl -fsSLo clusterctl "https://github.com/kubernetes-sigs/cluster-api/releases/download/${CLUSTERCTL_VERSION}/clusterctl-linux-amd64" && \
     chmod +x clusterctl && \
     mv ./clusterctl "$HOME/.local/bin/clusterctl" && \
     "$HOME/.local/bin/clusterctl" completion zsh > "$HOME/.config/zsh/completions/_clusterctl"
@@ -468,7 +484,7 @@ RUN export HUBBLE_ARCH=amd64 && \
 FROM base as base-kind
 
 ARG KIND_VERSION
-RUN curl -fLo ./kind "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64" && \
+RUN curl -fsSLo ./kind "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64" && \
     chmod +x ./kind && \
     mv ./kind "$HOME/.local/bin/kind" && \
     "$HOME/.local/bin/kind" completion zsh > "$HOME/.config/zsh/completions/_kind"
@@ -476,8 +492,8 @@ RUN curl -fLo ./kind "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd
 FROM base as base-k3s
 
 ARG K3S_VERSION
-RUN curl -fLO "https://github.com/k3s-io/k3s/releases/download/${K3S_VERSION}/k3s" && \
-    curl -fLO "https://github.com/k3s-io/k3s/releases/download/${K3S_VERSION}/sha256sum-amd64.txt" && \
+RUN curl -fsSLO "https://github.com/k3s-io/k3s/releases/download/${K3S_VERSION}/k3s" && \
+    curl -fsSLO "https://github.com/k3s-io/k3s/releases/download/${K3S_VERSION}/sha256sum-amd64.txt" && \
     sha256sum --check --ignore-missing sha256sum-amd64.txt && rm sha256sum-amd64.txt && \
     chmod +x ./k3s && \
     mv ./k3s "$HOME/.local/bin/k3s" && \
@@ -486,7 +502,8 @@ RUN curl -fLO "https://github.com/k3s-io/k3s/releases/download/${K3S_VERSION}/k3
 FROM base as base-kubebuilder
 
 ARG KUBEBUILDER_VERSION
-RUN curl -fLo kubebuilder "https://github.com/kubernetes-sigs/kubebuilder/releases/download/${KUBEBUILDER_VERSION}/kubebuilder_linux_amd64" && \
+RUN echo "kubebuilder version to install: ${KUBEBUILDER_VERSION}" && \
+    curl -fsSLo kubebuilder "https://github.com/kubernetes-sigs/kubebuilder/releases/download/${KUBEBUILDER_VERSION}/kubebuilder_linux_amd64" && \
     chmod +x ./kubebuilder && \
     mv ./kubebuilder "$HOME/.local/bin/kubebuilder" && \
     "$HOME/.local/bin/kubebuilder" completion zsh > "$HOME/.config/zsh/completions/_kubebuilder"
@@ -494,8 +511,9 @@ RUN curl -fLo kubebuilder "https://github.com/kubernetes-sigs/kubebuilder/releas
 FROM base as base-kustomize
 
 ARG KUSTOMIZE_VERSION
-RUN curl -fLO "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" && \
-    curl -fLO "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/checksums.txt" && \
+RUN echo "kustomize version to install: ${KUSTOMIZE_VERSION}" && \
+    curl -fsSLO "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" && \
+    curl -fsSLO "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/checksums.txt" && \
     sha256sum --check --ignore-missing checksums.txt && rm checksums.txt && \
     mkdir kustomize && \
     tar xzf kustomize*.tar.gz -C ./kustomize && \
@@ -507,7 +525,7 @@ RUN curl -fLO "https://github.com/kubernetes-sigs/kustomize/releases/download/ku
 FROM base as base-vault
 
 ARG VAULT_VERSION
-RUN curl -fLo vault.zip "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip" && \
+RUN curl -fsSLo vault.zip "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip" && \
     unzip vault.zip -d ./vault && \
     rm vault.zip && \
     chmod +x vault/vault && \
@@ -518,7 +536,8 @@ RUN curl -fLo vault.zip "https://releases.hashicorp.com/vault/${VAULT_VERSION}/v
 FROM base as base-kubeseal
 
 ARG KUBESEAL_VERSION
-RUN curl -fLo kubeseal.tar.gz "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz" && \
+RUN echo "kubeseal version to install: ${KUBESEAL_VERSION}" && \
+    curl -fsSLo kubeseal.tar.gz "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz" && \
     tar -xvzf kubeseal.tar.gz kubeseal && \
     rm kubeseal.tar.gz && \
     chmod +x kubeseal && \
@@ -528,7 +547,8 @@ RUN curl -fLo kubeseal.tar.gz "https://github.com/bitnami-labs/sealed-secrets/re
 FROM base as base-mc
 
 ARG MC_VERSION
-RUN curl -fLo "$HOME/.local/bin/mc" "https://dl.min.io/client/mc/release/linux-amd64/archive/mc.${MC_VERSION}" && \
+RUN echo "mc version to install: ${MC_VERSION}" && \
+    curl -fsSLo "$HOME/.local/bin/mc" "https://dl.min.io/client/mc/release/linux-amd64/archive/mc.${MC_VERSION}" && \
     chmod +x "$HOME/.local/bin/mc" && \
     "$HOME/.local/bin/mc" --help > /dev/null && \
     echo 'complete -o nospace -C /home/dev/.local/bin/mc mc' > "$HOME/.config/zsh/bash_completions/mc.completion"
@@ -536,8 +556,8 @@ RUN curl -fLo "$HOME/.local/bin/mc" "https://dl.min.io/client/mc/release/linux-a
 FROM base as base-k9s
 
 ARG K9S_VERSION
-RUN curl -fLO "https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/k9s_Linux_amd64.tar.gz" && \
-    curl -fLO "https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/checksums.sha256" && \
+RUN curl -fsSLO "https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/k9s_Linux_amd64.tar.gz" && \
+    curl -fsSLO "https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/checksums.sha256" && \
     sha256sum --check --ignore-missing checksums.sha256 && rm checksums.sha256 && \
     mkdir k9s && \
     tar xzf k9s*.tar.gz -C ./k9s && \
@@ -551,16 +571,15 @@ FROM base-container-tools as base-tools
 # note that we can unfortunately not use $HOME in the target directories for
 # COPY commands, so we have to hardcode the user name
 
-COPY --from=base-golang --chown=dev:dev /home/dev/.golang /home/dev/.golang
-RUN echo "changeme" | sudo -S chown -R root:root "$HOME/.golang/bin" && \
-    PATH="$HOME/.golang/bin:$PATH" go version
+# copy files without chown to preserve ownership set in base stage
+COPY --from=base-golang /home/dev/.golang /home/dev/.golang
+RUN PATH="$HOME/.golang/bin:$PATH" go version
 
-COPY --from=base-rust --chown=dev:dev /home/dev/.cargo /home/dev/.cargo
-COPY --from=base-rust --chown=dev:dev /home/dev/.rustup /home/dev/.rustup
+# copy files without chown to preserve ownership set in base stage
+COPY --from=base-rust /home/dev/.cargo /home/dev/.cargo
+COPY --from=base-rust /home/dev/.rustup /home/dev/.rustup
 COPY --from=base-rust --chown=root:root /home/dev/.config/zsh/completions/* /home/dev/.config/zsh/completions/
-RUN echo "changeme" | sudo -S chown -R root:root "$HOME/.cargo/bin" && \
-    echo "changeme" | sudo -S chown -R root:root "$HOME/.rustup/toolchains" && \
-    PATH="$HOME/.cargo/bin:$PATH" cargo --version
+RUN PATH="$HOME/.cargo/bin:$PATH" cargo --version
 
 COPY --from=base-python --chown=root:root /home/dev/.local/bin/uv* /home/dev/.local/bin/
 COPY --from=base-python --chown=root:root /home/dev/.local/bin/python* /home/dev/.local/bin/
@@ -571,7 +590,7 @@ RUN export PATH="$HOME/.local/bin:$PATH" && uv --version && python --version
 # install the Azure CLI directly into the final image to prevent some path issues
 RUN export PATH="$HOME/.local/bin:$PATH" && \
     uv tool install azure-cli --prerelease=allow && \
-    curl -fLo /home/dev/.config/zsh/bash_completions/az.completion https://raw.githubusercontent.com/Azure/azure-cli/dev/az.completion
+    curl -fsSLo /home/dev/.config/zsh/bash_completions/az.completion https://raw.githubusercontent.com/Azure/azure-cli/dev/az.completion
 
 COPY --from=base-node --chown=root:root /home/dev/.local/bin/fnm /home/dev/.local/bin/
 COPY --from=base-node --chown=dev:dev /home/dev/.local/share/fnm /home/dev/.local/share/fnm

@@ -42,22 +42,6 @@ RUN export TIMEZONE=Europe/Zurich && \
     update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 && \
     rm -rf /var/cache/debconf/*
 
-# install tools for C development (useful for building other projects from source)
-RUN apt-get update && \
-    apt-get install -y \
-    autoconf \
-    automake \
-    build-essential \
-    gcc \
-    libncurses-dev \
-    make \
-    && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /var/cache/debconf/* && \
-    rm -rf /var/cache/swcatalog/* && \
-    rm -rf /var/log/* && \
-    rm -rf /var/lib/command-not-found
-
 # install general tools
 RUN apt-get update && \
     apt-get install -y \
@@ -66,7 +50,6 @@ RUN apt-get update && \
     bash-completion \
     bzip2 \
     ca-certificates \
-    gdb \
     gddrescue \
     gnupg \
     htop \
@@ -79,6 +62,23 @@ RUN apt-get update && \
     whois \
     zip \
     zsh \
+    && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/debconf/* && \
+    rm -rf /var/cache/swcatalog/* && \
+    rm -rf /var/log/* && \
+    rm -rf /var/lib/command-not-found
+
+# install tools for C development (useful for building other projects from source)
+RUN apt-get update && \
+    apt-get install -y \
+    autoconf \
+    automake \
+    build-essential \
+    gcc \
+    gdb \
+    libncurses-dev \
+    make \
     && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/debconf/* && \
@@ -99,8 +99,7 @@ RUN apt-add-repository ppa:git-core/ppa && \
     rm -rf /var/lib/command-not-found
 
 # delete the default ubuntu user and create a dedicated dev user
-RUN userdel ubuntu && \
-    rm -rf /home/ubuntu && \
+RUN userdel --remove-home ubuntu && \
     export PASSWORD=$(mkpasswd -m sha512crypt changeme) && \
     groupadd dev --gid 1000 && \
     useradd dev \
