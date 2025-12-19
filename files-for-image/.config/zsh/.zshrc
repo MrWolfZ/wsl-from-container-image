@@ -384,14 +384,14 @@ fi
     # alias zoxide to d (because it is easier to access and it is a nice mnemonic for 'directory')
     alias d=z
 
-    # create a common alias for 'ls', although with this setup it is preferable to always use the 't' aliases below
-    alias ll='ls -alhov --color --group-directories-first'
+    # create a common alias for 'ls', although with this setup it is preferable to always use the 'l' aliases below
+    alias la='ls -alhov --color --group-directories-first'
 
     EZA_COMMAND='eza --all --long --group-directories-first --header --icons=always --smart-group --time-style long-iso --no-time --tree --level'
-    alias t="$EZA_COMMAND 1"
-    alias t2="$EZA_COMMAND 2"
-    alias t3="$EZA_COMMAND 3"
-    alias t4="$EZA_COMMAND 4"
+    alias l="$EZA_COMMAND 1"
+    alias ll="$EZA_COMMAND 2"
+    alias lll="$EZA_COMMAND 3"
+    alias llll="$EZA_COMMAND 4"
 
     # reset the LS_COLORS environment variable since it would conflict with our theme for eza
     unset LS_COLORS
