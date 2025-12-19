@@ -34,8 +34,8 @@ ExecStart=%h/.local/bin/k3s server \
     --rootless \
     --snapshotter=fuse-overlayfs \
     --data-dir=%h/.local/share/k3s \
-    --disable=servicelb \
-    --write-kubeconfig-mode=644
+    --write-kubeconfig-mode=644 \
+    --tls-san=host.containers.internal
 ExecReload=/bin/kill -s HUP $MAINPID
 KillMode=mixed
 Delegate=yes
