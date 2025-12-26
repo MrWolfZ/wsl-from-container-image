@@ -30,6 +30,7 @@ function k3s_start() {
       echo "To use kubectl with k3s in another shell, set:"
       echo "  export KUBECONFIG=\$HOME/.kube/k3s.yaml"
       export KUBECONFIG="$HOME/.kube/k3s.yaml"
+      sed 's/default/k3s_local/' $KUBECONFIG -i
     else
       echo "Warning: kubeconfig not found after ${max_wait}s. Check service status with: systemctl --user status k3s"
     fi
