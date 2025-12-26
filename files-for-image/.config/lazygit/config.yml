@@ -67,7 +67,7 @@ keybinding:
     suspendApp: <disabled>
     return: <esc>
     quitWithoutChangingDirectory: Q
-    togglePanel: <tab>
+    togglePanel: <backtab>
     prevItem: <up>
     nextItem: <down>
     prevItem-alt: <disabled>
