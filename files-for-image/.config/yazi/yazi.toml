@@ -5,6 +5,7 @@
 [mgr]
 # Layout ratios for parent:current:preview panels
 # ratio = [1, 4, 3]
+ratio = [1, 3, 4]
 
 # Sorting options
 # sort_by = "alphabetical"  # Options: "none", "mtime", "extension", "alphabetical", "natural", "size"
@@ -14,8 +15,8 @@
 # sort_translit = false     # Transliterate filenames for sorting
 
 # Display options
-# linemode = "none"         # Options: "none", "size", "mtime", "permissions"
-show_hidden = false # Show hidden files (can toggle with '.')
+linemode = "size"  # Options: "none", "size", "mtime", "permissions"
+show_hidden = true # Show hidden files (can toggle with '.')
 # show_symlink = true       # Show symlink targets
 
 # Scrolling behavior
@@ -23,6 +24,7 @@ show_hidden = false # Show hidden files (can toggle with '.')
 
 # Mouse support
 # mouse_events = ["click", "scroll"]
+mouse_events = []
 
 # Terminal title format
 # title_format = "Yazi: {cwd}"

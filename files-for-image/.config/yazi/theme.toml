@@ -1,0 +1,103 @@
+# 0x96f theme for yazi
+# Converted from superfile theme by: https://github.com/filipjanevski
+
+# ========= Manager (File Panel) =========
+[mgr]
+# Default file/directory colors
+cwd = { fg = "#ffcc00", bold = true } # Current directory icon color
+
+# Hovered item (cursor)
+hovered = { reversed = true, bold = true }
+preview_hovered = { underline = true }
+
+# Find feature
+find_keyword = { fg = "#ffcc00", italic = true }
+find_position = { fg = "#baebf6", bg = "reset", italic = true }
+
+# Marker (selected files)
+marker_selected = { fg = "#ffcc00", bg = "#ffcc00" }
+marker_marked = { fg = "#3c84b4", bg = "#3c84b4" }
+marker_copied = { fg = "#189b23", bg = "#189b23" }
+marker_cut = { fg = "#e05d5f", bg = "#e05d5f" }
+
+count_copied = { fg = "#262427", bg = "#189b23" }
+count_cut = { fg = "#262427", bg = "#e05d5f" }
+count_selected = { fg = "#262427", bg = "#ffcc00" }
+
+# Border
+border_symbol = "│"
+border_style = { fg = "#757075" }
+
+# Tab bar
+[tabs]
+active = { fg = "#262427", bg = "#fcfcfc", bold = true }
+inactive = { fg = "#fcfcfc", bg = "#646064" }
+
+# ========= Status Bar (Footer) =========
+[status]
+separator_open = ""
+separator_close = ""
+separator_style = { fg = "#757075", bg = "#262427" }
+
+# ========= Select Mode =========
+[select]
+border = { fg = "#ffcc00" }
+active = { fg = "#baebf6" }
+inactive = { fg = "#fcfcfc" }
+
+# ========= Input Field =========
+[input]
+border = { fg = "#ffcc00" }
+title = { fg = "#00b4ff" }
+value = { fg = "#fcfcfc" }
+
+# ========= Confirm Dialog (Modals) =========
+[confirm]
+border = { fg = "#ffcc00" }
+title = { fg = "#00b4ff" }
+content = { fg = "#fcfcfc" }
+
+# ========= Tasks =========
+[tasks]
+border = { fg = "#ffcc00" }
+title = { fg = "#00b4ff" }
+hovered = { underline = true }
+
+# ========= File Types =========
+[filetype]
+
+rules = [
+  # Images
+  { mime = "image/*", fg = "#aa0bf3", bold = true },
+
+  # Videos
+  { mime = "video/*", fg = "#aa0bf3", bold = true },
+  { mime = "audio/*", fg = "#14a0e0" },
+
+  # Archives
+  { mime = "application/zip", fg = "#fd5858" },
+  { mime = "application/gzip", fg = "#fd5858" },
+  { mime = "application/x-tar", fg = "#fd5858" },
+  { mime = "application/x-bzip", fg = "#fd5858" },
+  { mime = "application/x-bzip2", fg = "#fd5858" },
+  { mime = "application/x-7z-compressed", fg = "#fd5858" },
+  { mime = "application/x-rar", fg = "#fd5858" },
+
+  # Documents
+  { mime = "text/*", fg = "#fcfcfc" },
+  { mime = "application/json", fg = "#fcfcfc" },
+  { mime = "*/xml", fg = "#fcfcfc" },
+
+  # Executables
+  { name = "*", is = "exec", fg = "#00b31e" },
+
+  # Symlinks
+  { name = "*", is = "link", fg = "#9c10d3" },
+
+  # Orphaned symlinks
+  { name = "*", is = "orphan", fg = "#ff8787" },
+
+  # Fallback
+  { name = "*", fg = "#fcfcfc" },
+  { name = "*/", fg = "#3195cf" },
+]

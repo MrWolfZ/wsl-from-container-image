@@ -148,6 +148,10 @@ Common fzf options are centralized via `FZF_DEFAULT_OPTS` in `.zshrc` for consis
 
 The fzf history search is configured via `FZF_CTRL_R_OPTS` in `.zshrc` for an optimal search experience
 
+### Yazi Theme Configuration (`files-for-image/.config/yazi/theme.toml`)
+
+Yazi is configured with a custom theme that matches the overall dark gray aesthetic with yellow/gold accents.
+
 ### Search Functions
 
 The shell includes a set of powerful search functions that combine modern CLI tools (ripgrep, fd) with fzf for fast file finding:
