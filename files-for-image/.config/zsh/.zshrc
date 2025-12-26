@@ -442,6 +442,16 @@ fi
       ip route show | grep -i default | awk '{ print $3 }'
     }
 
+    # see: https://stackoverflow.com/a/31110176
+    git_fix_empty_file() {
+      cp -a .git .git-old
+      find .git/objects/ -type f -empty -delete
+      git fetch -p
+      git fsck --full
+
+      echo "you can 'rm -rf .git-old' if everything is working again"
+    }
+
     # unlock_local_bin - allow writing to "$HOME/.local/bin"
     source "$ZDOTDIR/functions/unlock_local_bin.zsh"
 
@@ -474,7 +484,14 @@ fi
     ABBR_TMPDIR="$HOME/.cache/zsh/zsh-abbr"
 
     # configure prefixes: https://zsh-abbr.olets.dev/prefixes.html
-    ABBR_REGULAR_ABBREVIATION_SCALAR_PREFIXES=('sudo' 'watch')
+    ABBR_REGULAR_ABBREVIATION_SCALAR_PREFIXES=(
+      'sudo'
+      'watch'
+      'watch -n 1'
+      'watch -n 2'
+      'watch -n 5'
+      'watch -n 10'
+    )
     # ABBR_REGULAR_ABBREVIATION_GLOB_PREFIXES=()
 
     # configure cursor placement: https://zsh-abbr.olets.dev/cursor-placement.html
@@ -519,6 +536,12 @@ fi
 		# the default python installation does not work, so we alias python to use the python install from a venv or fall back to uv
 		alias python='[[ -n "${VIRTUAL_ENV:-}" ]] && "${VIRTUAL_ENV}/bin/python" || uv run python'
 		alias python3='[[ -n "${VIRTUAL_ENV:-}" ]] && "${VIRTUAL_ENV}/bin/python3" || uv run python3'
+
+    # powerlevel10k shows some prompt segments only when a matching command is typed (e.g. showing the kubecontext when
+    # typing `kubectl`); however, this does not work when using an abbreviation for the command, but it _does_ work when
+    # the command is an alias; therefore we export selected abbreviations as aliases, even though the alias will never be
+    # actually used since the abbreviation will be expanded first
+    zsh-defer -1 -c 'eval $(abbr export-aliases | sed "s/\$(.*)//" | grep "=\"kubectl")'
 
   # final configuration tweaks
     # prefer VS Code if available, otherwise fallback to micro (set earlier in this file)
