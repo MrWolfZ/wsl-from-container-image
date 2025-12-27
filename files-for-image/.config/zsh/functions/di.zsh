@@ -5,10 +5,7 @@ di() {
   fi
 
   local dest=$(zoxide query --list --score |
-    fzf --layout reverse --info inline --border \
-      --preview "eza --all --group-directories-first --header --long --no-user --no-permissions --color=always {2}" \
-      $query_args \
-      --no-sort |
+    fzf "${FZF_ZOXIDE_OPTS_ARR[@]}" $query_args |
     awk '{print $2}')
   [[ -n "$dest" ]] && cd "$dest"
 }

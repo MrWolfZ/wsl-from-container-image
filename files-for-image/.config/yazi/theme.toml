@@ -4,7 +4,8 @@
 # ========= Manager (File Panel) =========
 [mgr]
 # Default file/directory colors
-cwd = { fg = "#ffcc00", bold = true } # Current directory icon color
+# cwd = { fg = "#ffcc00", bold = true } # Current directory icon color
+cwd = { fg = "#3195cf", bold = true } # Current directory icon color
 
 # Hovered item (cursor)
 hovered = { reversed = true, bold = true }
@@ -99,5 +100,7 @@ rules = [
 
   # Fallback
   { name = "*", fg = "#fcfcfc" },
-  { name = "*/", fg = "#3195cf" },
+  # { name = "*/", fg = "#3195cf" },
+  # { name = "*/", fg = "#edbf00" },
+  { name = "*/", fg = "#ffcc00" },
 ]

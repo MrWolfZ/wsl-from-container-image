@@ -98,6 +98,13 @@ fi
   export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --no-hscroll --no-mouse --ansi $FZF_COLORS"
   export FZF_CTRL_R_OPTS="$FZF_DEFAULT_OPTS"
 
+  FZF_ZOXIDE_EZA_PREVIEW_COMMAND="eza --all --group-directories-first --header --long --no-user --no-permissions --color=always {2}"
+  declare -a FZF_ZOXIDE_OPTS_ARR=(--layout reverse --info inline --border --preview "$FZF_ZOXIDE_EZA_PREVIEW_COMMAND" --no-sort --preview-window right:45%)
+
+  # the zoxide plugin sets some options which we want to override (see https://github.com/sxyazi/yazi/blob/main/yazi-plugin/preset/plugins/zoxide.lua)
+  export FZF_ZOXIDE_OPTS="--layout reverse --info inline --border --preview \"$FZF_ZOXIDE_EZA_PREVIEW_COMMAND\" --no-sort --preview-window right:45%"
+	export YAZI_ZOXIDE_OPTS="$FZF_ZOXIDE_OPTS"
+
 # --------- Source Antidote ----------
   # we need to set the zstyle before loading the ez-compinit plugin
   # Available completion styles: gremlin, ohmy, prez, zshzoo
